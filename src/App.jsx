@@ -252,7 +252,7 @@ export default function SahabatKuApp() {
     return { layers: [l], activeLayerId: l.id };
   });
 
-  const [activeTool, setActiveTool] = useState("stamp");
+  const [activeTool, setActiveTool] = useState("pencil");
   const [rectFilled, setRectFilled] = useState(false);
   const [activeColor, setActiveColor] = useState("#FF70BF");
   const [pickerColor, setPickerColor] = useState("#FF70BF");

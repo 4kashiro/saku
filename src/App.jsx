@@ -24,6 +24,8 @@ const C = {
 
 /* ---------------------------------- data ------------------------------------ */
 const STAMP_SHAPES = {
+  "allah": [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [0, 2], [1, 2], [2, 2], [4, 2], [6, 2], [2, 3], [4, 3], [6, 3], [0, 4], [1, 4], [2, 4], [4, 4], [6, 4], [0, 5], [2, 5], [4, 5], [6, 5], [0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6]],
+  "muhammad": [[0, 0], [2, 0], [4, 0], [5, 0], [6, 0], [0, 1], [2, 1], [4, 1], [6, 1], [0, 2], [1, 2], [2, 2], [4, 2], [5, 2], [6, 2], [0, 3], [4, 3], [0, 4], [1, 4], [2, 4], [4, 4], [5, 4], [6, 4], [0, 5], [2, 5], [6, 5], [0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6]],
   "alif": [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]],
   "ba": [[0, 0], [2, 0], [0, 1], [2, 1], [0, 2], [1, 2], [2, 2]],
   "ba-5": [[0, 0], [1, 0], [2, 0], [4, 0], [0, 1], [4, 1], [0, 2], [1, 2], [2, 2], [3, 2], [4, 2]],
@@ -61,12 +63,13 @@ const STAMP_SHAPES = {
   "lamalif-5": [[0, 0], [2, 0], [0, 1], [2, 1], [0, 2], [1, 2], [2, 2], [0, 3], [2, 3], [0, 4], [1, 4], [2, 4]],
   "hamzah": [[2, 0], [3, 0], [4, 0], [2, 1], [0, 2], [1, 2], [2, 2], [3, 2], [4, 2]],
   "hamzah-5": [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2], [1, 2], [2, 2]],
-  "hamzah-7": [[2, 0], [3, 0], [4, 0], [2, 1], [4, 1], [2, 2], [4, 2], [2, 3], [0, 4], [1, 4], [2, 4], [3, 4], [4, 4]],
   "ya": [[0, 0], [2, 0], [3, 0], [4, 0], [0, 1], [2, 1], [0, 2], [2, 2], [3, 2], [4, 2], [0, 3], [4, 3], [0, 4], [1, 4], [2, 4], [3, 4], [4, 4]],
   "ya-7": [[0, 0], [2, 0], [3, 0], [4, 0], [0, 1], [2, 1], [4, 1], [0, 2], [2, 2], [4, 2], [0, 3], [2, 3], [0, 4], [2, 4], [3, 4], [4, 4], [0, 5], [4, 5], [0, 6], [1, 6], [2, 6], [3, 6], [4, 6]],
 };
 
 const STAMP_LABELS = {
+  "allah": "Allah",
+  "muhammad": "Muhammad",
   "alif": "Alif",
   "ba": "Ba",
   "ba-5": "Ba-5",
@@ -104,35 +107,33 @@ const STAMP_LABELS = {
   "lamalif-5": "Lamalif-5",
   "hamzah": "Hamzah",
   "hamzah-5": "Hamzah-5",
-  "hamzah-7": "Hamzah-7",
   "ya": "Ya",
   "ya-7": "Ya-7",
 };
+
 const STAMP_ORDER = [
-  "alif", "ba", "ba-5", "ba-7", "ta", "tsa", "jim", "jim-5", 
-  "ha", "dal", "dal-5", "ra", "sin", "shad", "tha", "tha-5", 
-  "ain", "ain-7", "fa", "kaf", "rumahkaf", "rumahkaf-7", "lam", "lam-5", 
-  "mim", "mim-5", "nun", "nun-5", "wau", "waw-7", "hha", "hha-5", 
-  "hha-7", "lamalif", "lamalif-5", "hamzah", "hamzah-5", "hamzah-7", "ya", "ya-7"
+  "allah", "muhammad", "alif", "ba", "ba-5", "ba-7", "ta", "tsa", "jim", "jim-5", 
+  "ha", "dal", "dal-5", "ra", "sin", "shad", "tha", "tha-5", "ain", "ain-7", "fa", 
+  "kaf", "rumahkaf", "rumahkaf-7", "lam", "lam-5", "mim", "mim-5", "nun", "nun-5", 
+  "wau", "waw-7", "hha", "hha-5", "hha-7", "lamalif", "lamalif-5", "hamzah", "hamzah-5", 
+  "ya", "ya-7"
 ];
 
 const BUILTIN_STAMPS = STAMP_ORDER.map((id) => {
   const cells = STAMP_SHAPES[id];
-  // Cari nilai maksimum x dan y untuk menentukan lebar (w) dan tinggi (h)
   const maxX = Math.max(...cells.map(coord => coord[0]));
   const maxY = Math.max(...cells.map(coord => coord[1]));
   
   return {
     id, 
     kind: "cells", 
-    w: maxX + 1, // Ditambah 1 karena koordinat dimulai dari 0
+    w: maxX + 1,
     h: maxY + 1, 
     cells: cells, 
     label: STAMP_LABELS[id], 
     builtin: true,
   };
 });
-
 const MAX_STAMP = 64; // generous safety ceiling, not a real design limit
 
 function rotSteps(rotation) {
@@ -215,13 +216,17 @@ const PALETTES = {
   "Modern Neon": ["#0D0D0D", "#FF2E63", "#08D9D6", "#F9F871"],
   "Earth Tone": ["#5C4033", "#A9746E", "#D2B48C", "#6B8E23", "#3E2723"],
   Premium: ["#000000", "#FFFFFF", "#D4AF37", "#0A0A0A"],
+  "Pastel Dream": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
+  "Cyberpunk": ["#FCEE09", "#00FFF5", "#FF007F", "#111111", "#7B00FF"],
+  "Forest": ["#2C5F2D", "#97BC62", "#113014", "#D8E2DC"],
+  "Sunset": ["#FF4E50", "#FC913A", "#F9D423", "#EDE574"],
+  "Ocean": ["#00B4DB", "#0083B0", "#E0EAFC", "#CFDEF3"],
 };
 const GRID_PRESETS = [
   { label: "16×16", cols: 16, rows: 16 },
   { label: "32×32", cols: 32, rows: 32 },
   { label: "64×64", cols: 64, rows: 64 },
 ];
-const ZOOM_STEPS = [0.5, 0.75, 1, 1.5, 2, 3];
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -240,6 +245,7 @@ export default function SahabatKuApp() {
   const [showGrid, setShowGrid] = useState(true);
   const [showAltShading, setShowAltShading] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [exportScale, setExportScale] = useState(16); // px per cell for export
 
   const [project, setProject] = useState(() => {
     const l = makeLayer("Layer 1");
@@ -258,7 +264,7 @@ export default function SahabatKuApp() {
   const [selectedStampId, setSelectedStampId] = useState(null);
   const [hoverCell, setHoverCell] = useState(null);
 
-  const [stampChoiceId, setStampChoiceId] = useState("bar-h");
+  const [stampChoiceId, setStampChoiceId] = useState("allah");
   const [nextStampRotation, setNextStampRotation] = useState(0);
   const [nextFootprintW, setNextFootprintW] = useState(3);
   const [nextFootprintH, setNextFootprintH] = useState(3);
@@ -292,6 +298,10 @@ export default function SahabatKuApp() {
   const [sidebarPinned, setSidebarPinned] = useState(false);
   const sidebarExpanded = sidebarHovered || sidebarPinned;
   const hoverTimerRef = useRef(null);
+  
+  // gesture state for zooming
+  const pinchStartDistRef = useRef(null);
+  const pinchStartZoomRef = useRef(null);
 
   const [panels, setPanels] = useState({
     grid: { open: true, collapsed: false },
@@ -381,19 +391,16 @@ export default function SahabatKuApp() {
     const cellPx = getCellPx();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    // Handle both mouse/pointer events and touch events
+    const clientX = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    const clientY = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
     let gx = Math.floor(x / cellPx);
     let gy = Math.floor(y / cellPx);
     gx = Math.max(0, Math.min(gridCols - 1, gx));
     gy = Math.max(0, Math.min(gridRows - 1, gy));
     return { gx, gy };
-  }
-  function isInsideCanvas(e) {
-    const canvas = canvasRef.current;
-    if (!canvas) return false;
-    const r = canvas.getBoundingClientRect();
-    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
   }
 
   /* --------------------------- canvas render --------------------------- */
@@ -713,6 +720,9 @@ export default function SahabatKuApp() {
   /* --------------------------- pointer handlers (pointer capture keeps the stroke alive
      even if the cursor briefly leaves the small canvas element while dragging fast) --------------------------- */
   function handlePointerDown(e) {
+    // Let touch zoom gestures through
+    if (e.touches && e.touches.length > 1) return;
+    
     e.preventDefault();
     try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
     const { gx, gy } = getGridCoords(e);
@@ -790,6 +800,7 @@ export default function SahabatKuApp() {
   }
 
   function handlePointerMove(e) {
+    if (e.touches && e.touches.length > 1) return;
     const { gx, gy } = getGridCoords(e);
     setHoverCell({ gx, gy });
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
@@ -842,6 +853,7 @@ export default function SahabatKuApp() {
   }
 
   function handlePointerUp(e) {
+    if (e.touches && e.touches.length > 1) return;
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
       if (activeTool === "eraser" && selectedStampId && draftRef.current) {
         const layer = draftRef.current.layers.find((l) => l.id === draftRef.current.activeLayerId);
@@ -884,6 +896,50 @@ export default function SahabatKuApp() {
   function handlePointerLeave() {
     if (!isDrawing && !movingSelection && !draggingStamp) setHoverCell(null);
   }
+  
+  /* --------------------------- gesture pinch to zoom --------------------------- */
+  function getDistance(t1, t2) {
+    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+  }
+  
+  function handleTouchStart(e) {
+    if (e.touches.length === 2) {
+      pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]);
+      pinchStartZoomRef.current = zoom;
+    }
+  }
+  
+  function handleTouchMove(e) {
+    if (e.touches.length === 2 && pinchStartDistRef.current) {
+      e.preventDefault();
+      const dist = getDistance(e.touches[0], e.touches[1]);
+      const scale = dist / pinchStartDistRef.current;
+      const newZoom = Math.max(0.2, Math.min(5, pinchStartZoomRef.current * scale));
+      setZoom(newZoom);
+    }
+  }
+
+  function handleTouchEnd(e) {
+    if (e.touches.length < 2) {
+      pinchStartDistRef.current = null;
+    }
+  }
+  
+  function handleWheel(e) {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.1 : -0.1;
+      setZoom((z) => Math.max(0.2, Math.min(5, z + delta)));
+    }
+  }
+
+  useEffect(() => {
+    const stage = document.getElementById("canvas-stage");
+    if(stage) {
+       stage.addEventListener('wheel', handleWheel, {passive: false});
+       return () => stage.removeEventListener('wheel', handleWheel);
+    }
+  }, []);
 
   /* --------------------------- keyboard shortcuts --------------------------- */
   useEffect(() => {
@@ -1068,7 +1124,7 @@ export default function SahabatKuApp() {
     return off;
   }
   function exportPNG() {
-    const off = renderToOffscreen(16, false);
+    const off = renderToOffscreen(exportScale, false);
     off.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -1113,7 +1169,7 @@ export default function SahabatKuApp() {
     URL.revokeObjectURL(url);
   }
   function exportPDF() {
-    const off = renderToOffscreen(16, true);
+    const off = renderToOffscreen(exportScale, true);
     const dataUrl = off.toDataURL("image/png");
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
@@ -1155,34 +1211,61 @@ export default function SahabatKuApp() {
       `}</style>
 
       {/* ---------- top bar ---------- */}
-      <div className="flex items-center gap-3 px-4 h-14 shrink-0 border-b" style={{ background: C.panel, borderColor: C.line }}>
+      <div className="flex items-center gap-3 px-4 h-14 shrink-0 border-b overflow-x-auto overflow-y-hidden" style={{ background: C.panel, borderColor: C.line }}>
         <div className="flex items-center gap-2 mr-1">
-          <div style={{ background: C.gold, width: 22, height: 22, borderRadius: 4 }} className="flex items-center justify-center">
+          <div style={{ background: C.gold, width: 22, height: 22, borderRadius: 4 }} className="flex items-center justify-center shrink-0">
             <span style={{ color: C.chrome, fontSize: 12, fontWeight: 700 }}>ﮐ</span>
           </div>
-          <span style={{ fontFamily: "'Amiri', serif", fontSize: 20, letterSpacing: 0.3 }}>SahabatKu</span>
+          <span style={{ fontFamily: "'Amiri', serif", fontSize: 20, letterSpacing: 0.3 }} className="shrink-0 whitespace-nowrap">
+            <span style={{ color: C.gold }}>Sa</span>Ku
+          </span>
         </div>
-        <div className="w-px h-6" style={{ background: C.line }} />
+        <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
         <IconBtn title="Baru" onClick={newCanvas}><FilePlus2 size={17} /></IconBtn>
         <IconBtn title="Simpan (.saku)" onClick={saveProject}><Save size={17} /></IconBtn>
         <IconBtn title="Buka file .saku" onClick={() => fileInputRef.current.click()}><FolderOpen size={17} /></IconBtn>
         <input ref={fileInputRef} type="file" accept=".saku,.json" className="hidden" onChange={handleOpenFile} />
-        <div className="w-px h-6" style={{ background: C.line }} />
+        
+        <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
         <IconBtn title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}><Undo2 size={17} /></IconBtn>
         <IconBtn title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={redo}><Redo2 size={17} /></IconBtn>
-        <div className="w-px h-6" style={{ background: C.line }} />
-        <IconBtn title="Perkecil" onClick={() => zoomStep(-1)}><ZoomOut size={17} /></IconBtn>
-        <span className="text-xs w-10 text-center" style={{ color: C.muted }}>{Math.round(zoom * 100)}%</span>
-        <IconBtn title="Perbesar" onClick={() => zoomStep(1)}><ZoomIn size={17} /></IconBtn>
-        <div className="flex-1" />
-        <IconBtn title="Export PNG" onClick={exportPNG}><ImageIcon size={17} /></IconBtn>
-        <IconBtn title="Export SVG" onClick={exportSVG}><FileText size={17} /></IconBtn>
-        <IconBtn title="Export PDF (cetak browser)" onClick={exportPDF}><Printer size={17} /></IconBtn>
-        <div className="w-px h-6" style={{ background: C.line }} />
-        <PanelToggle title="Panel Grid" active={panels.grid.open} onClick={() => openPanelPinned("grid")}><Grid3x3 size={16} /></PanelToggle>
-        <PanelToggle title="Panel Warna" active={panels.color.open} onClick={() => openPanelPinned("color")}><Palette size={16} /></PanelToggle>
-        <PanelToggle title="Panel Stempel" active={panels.stamp.open} onClick={() => openPanelPinned("stamp")}><Stamp size={16} /></PanelToggle>
-        <PanelToggle title="Panel Layer" active={panels.layer.open} onClick={() => openPanelPinned("layer")}><LayersIcon size={16} /></PanelToggle>
+        
+        <div className="hidden md:block w-px h-6 shrink-0" style={{ background: C.line }} />
+        <div className="hidden md:flex items-center shrink-0">
+            <IconBtn title="Perkecil" onClick={() => zoomStep(-1)}><ZoomOut size={17} /></IconBtn>
+            <span className="text-xs w-10 text-center" style={{ color: C.muted }}>{Math.round(zoom * 100)}%</span>
+            <IconBtn title="Perbesar" onClick={() => zoomStep(1)}><ZoomIn size={17} /></IconBtn>
+        </div>
+        
+        <div className="flex-1 shrink-0 min-w-4" />
+        
+        {/* Export Dropdown & Buttons (hidden on small screens) */}
+        <div className="hidden sm:flex items-center gap-1 shrink-0">
+            <select 
+               title="Skala Export (px per kotak)" 
+               value={exportScale} 
+               onChange={(e) => setExportScale(Number(e.target.value))} 
+               className="text-[11px] px-1.5 py-1 rounded cursor-pointer mr-1" 
+               style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}
+            >
+               <option value="1">Skala 1x</option>
+               <option value="4">Skala 4x</option>
+               <option value="8">Skala 8x</option>
+               <option value="16">Skala 16x</option>
+               <option value="20">Skala 20x</option>
+            </select>
+            <IconBtn title="Export PNG" onClick={exportPNG}><ImageIcon size={17} /></IconBtn>
+            <IconBtn title="Export SVG" onClick={exportSVG}><FileText size={17} /></IconBtn>
+            <IconBtn title="Export PDF (cetak browser)" onClick={exportPDF}><Printer size={17} /></IconBtn>
+        </div>
+
+        <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
+        <div className="flex items-center shrink-0">
+            <PanelToggle title="Panel Grid" active={panels.grid.open} onClick={() => openPanelPinned("grid")}><Grid3x3 size={16} /></PanelToggle>
+            <PanelToggle title="Panel Warna" active={panels.color.open} onClick={() => openPanelPinned("color")}><Palette size={16} /></PanelToggle>
+            <PanelToggle title="Panel Stempel" active={panels.stamp.open} onClick={() => openPanelPinned("stamp")}><Stamp size={16} /></PanelToggle>
+            <PanelToggle title="Panel Layer" active={panels.layer.open} onClick={() => openPanelPinned("layer")}><LayersIcon size={16} /></PanelToggle>
+        </div>
       </div>
 
       {/* ---------- main area ---------- */}
@@ -1201,7 +1284,7 @@ export default function SahabatKuApp() {
         </div>
 
         {/* canvas stage */}
-        <div className="flex-1 min-w-0 flex flex-col items-center justify-center relative" style={{ background: "#12151A" }}>
+        <div id="canvas-stage" className="flex-1 min-w-0 flex flex-col items-center justify-center relative overflow-hidden" style={{ background: "#12151A" }}>
           {hasActiveObject ? (
             <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
               <span className="text-xs" style={{ color: C.muted }}>{selection ? "Seleksi aktif" : "Stempel terpilih"}</span>
@@ -1221,7 +1304,12 @@ export default function SahabatKuApp() {
               </button>
             </div>
           ) : null}
-          <div className="max-w-full max-h-full overflow-auto p-6">
+          <div 
+             className="max-w-full max-h-full overflow-auto p-6 touch-none" 
+             onTouchStart={handleTouchStart}
+             onTouchMove={handleTouchMove}
+             onTouchEnd={handleTouchEnd}
+          >
             <canvas
               ref={canvasRef}
               draggable={false}
@@ -1234,8 +1322,8 @@ export default function SahabatKuApp() {
               style={{ cursor: activeTool === "select" ? "default" : "crosshair", boxShadow: "0 8px 30px rgba(0,0,0,0.5)", imageRendering: "pixelated" }}
             />
           </div>
-          <p className="text-xs pb-3" style={{ color: C.muted }}>
-            Klik lalu seret untuk pensil/penghapus/line/rectangle. Untuk stempel, arahkan kursor untuk melihat pratinjau transparan sebelum klik.
+          <p className="text-xs pb-3 hidden md:block" style={{ color: C.muted }}>
+            Klik lalu seret untuk pensil/penghapus/line/rectangle. Untuk stempel, arahkan kursor untuk melihat pratinjau transparan sebelum klik. Scroll atau pinch untuk zoom.
           </p>
         </div>
 

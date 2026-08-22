@@ -4,6 +4,7 @@ import {
   Eye, EyeOff, Lock, Unlock, Copy, ChevronUp, ChevronDown, Undo2, Redo2,
   ZoomIn, ZoomOut, FilePlus2, FolderOpen, Save, Image as ImageIcon, FileText,
   Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Pin, Upload,
+  Slash, Square,
 } from "lucide-react";
 
 /* ---------------------------------- tokens --------------------------------- */
@@ -207,7 +208,7 @@ function drawStampOnCtx(ctx, st, cellPx, imageCacheRef, onImageReady, alpha) {
 }
 
 const PALETTES = {
-  "Color Hunt": ["#462C7D", "#831C91", "#D552A3", "#FF70BF"],
+  "Sahabat Purple": ["#462C7D", "#831C91", "#D552A3", "#FF70BF"],
   "Kufi Klasik": ["#1A1A1A", "#F4ECD8", "#C9A227", "#8B5E34"],
   Monokrom: ["#000000", "#404040", "#808080", "#BFBFBF", "#FFFFFF"],
   "Pixel Retro": ["#FF004D", "#00E5FF", "#FFEC27", "#1A1A2E", "#29ADFF", "#00E436"],
@@ -237,6 +238,7 @@ export default function SahabatKuApp() {
   const [gridCols, setGridCols] = useState(32);
   const [gridRows, setGridRows] = useState(32);
   const [showGrid, setShowGrid] = useState(true);
+  const [showAltShading, setShowAltShading] = useState(false);
   const [zoom, setZoom] = useState(1);
 
   const [project, setProject] = useState(() => {
@@ -245,11 +247,12 @@ export default function SahabatKuApp() {
   });
 
   const [activeTool, setActiveTool] = useState("stamp");
+  const [rectFilled, setRectFilled] = useState(false);
   const [activeColor, setActiveColor] = useState("#FF70BF");
   const [pickerColor, setPickerColor] = useState("#FF70BF");
   const [customPalette, setCustomPalette] = useState([]);
   const [recentColors, setRecentColors] = useState([]);
-  const [activePaletteName, setActivePaletteName] = useState("Color Hunt");
+  const [activePaletteName, setActivePaletteName] = useState("Sahabat Purple");
 
   const [selection, setSelection] = useState(null);
   const [selectedStampId, setSelectedStampId] = useState(null);
@@ -312,6 +315,9 @@ export default function SahabatKuApp() {
   const stampUploadRef = useRef(null);
   const draftRef = useRef(null);
   const movingBlockRef = useRef(null);
+  const moveBaselineRef = useRef(null);
+  const shapeStartRef = useRef(null);
+  const shapeBaselineRef = useRef(null);
   const moveAnchorRef = useRef(null);
   const moveDimRef = useRef(null);
   const moveStartGridRef = useRef(null);
@@ -403,6 +409,15 @@ export default function SahabatKuApp() {
     ctx.fillStyle = "#F4F2EC";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    if (showAltShading) {
+      ctx.fillStyle = "rgba(90,50,140,0.09)";
+      for (let y = 0; y < gridRows; y++) {
+        for (let x = 0; x < gridCols; x++) {
+          if (x % 2 === 1 && y % 2 === 1) ctx.fillRect(x * cellPx, y * cellPx, cellPx, cellPx);
+        }
+      }
+    }
+
     project.layers.forEach((layer) => {
       if (!layer.visible) return;
       ctx.globalAlpha = layer.opacity;
@@ -477,7 +492,7 @@ export default function SahabatKuApp() {
       ctx.strokeRect(ggx * cellPx + 1, ggy * cellPx + 1, effW * cellPx - 2, effH * cellPx - 2);
       ctx.setLineDash([]);
     }
-  }, [project, gridCols, gridRows, showGrid, zoom, selection, selectedStampId, activeTool, hoverCell, chosenStamp, nextStampRotation, nextFootprintW, nextFootprintH, activeColor, draggingStamp, isDrawing]);
+  }, [project, gridCols, gridRows, showGrid, showAltShading, zoom, selection, selectedStampId, activeTool, hoverCell, chosenStamp, nextStampRotation, nextFootprintW, nextFootprintH, activeColor, draggingStamp, isDrawing]);
 
   useEffect(() => {
     drawCanvasRef.current = drawCanvas;
@@ -549,8 +564,7 @@ export default function SahabatKuApp() {
 
   /* --------------------------- selection: move / rotate / delete --------------------------- */
   function updateMovePreview(newX0, newY0) {
-    const base = draftRef.current;
-    const next = deepClone(base);
+    const next = deepClone(moveBaselineRef.current);
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
     Object.entries(movingBlockRef.current).forEach(([relKey, color]) => {
       const [rx, ry] = relKey.split(",").map(Number);
@@ -715,6 +729,11 @@ export default function SahabatKuApp() {
       }
       lastPaintRef.current = { gx, gy };
       setIsDrawing(true);
+    } else if (activeTool === "line" || activeTool === "rect") {
+      beginStroke();
+      shapeBaselineRef.current = deepClone(draftRef.current);
+      shapeStartRef.current = { gx, gy };
+      setIsDrawing(true);
     } else if (activeTool === "bucket") {
       bucketFill(gx, gy, activeColor);
     } else if (activeTool === "stamp") {
@@ -757,6 +776,7 @@ export default function SahabatKuApp() {
             }
           }
         movingBlockRef.current = block;
+        moveBaselineRef.current = deepClone(next);
         moveAnchorRef.current = { x0, y0 };
         moveDimRef.current = { w, h };
         moveStartGridRef.current = { gx, gy };
@@ -777,6 +797,24 @@ export default function SahabatKuApp() {
       if (activeTool === "eraser") eraseLineLive(from, { gx, gy });
       else paintLineLive(from, { gx, gy }, activeColor);
       lastPaintRef.current = { gx, gy };
+    } else if (isDrawing && (activeTool === "line" || activeTool === "rect") && shapeStartRef.current) {
+      const next = deepClone(shapeBaselineRef.current);
+      const layer = next.layers.find((l) => l.id === next.activeLayerId);
+      const { gx: sx, gy: sy } = shapeStartRef.current;
+      if (activeTool === "line") {
+        bresenhamLine(sx, sy, gx, gy).forEach(([x, y]) => { layer.cells[`${x},${y}`] = activeColor; });
+      } else {
+        const x0 = Math.min(sx, gx), x1 = Math.max(sx, gx);
+        const y0 = Math.min(sy, gy), y1 = Math.max(sy, gy);
+        for (let x = x0; x <= x1; x++) {
+          for (let y = y0; y <= y1; y++) {
+            const onBorder = x === x0 || x === x1 || y === y0 || y === y1;
+            if (rectFilled || onBorder) layer.cells[`${x},${y}`] = activeColor;
+          }
+        }
+      }
+      setProject(next);
+      draftRef.current = next;
     } else if (isDrawing && activeTool === "select") {
       setSelection((sel) => (sel ? { ...sel, x1: gx, y1: gy } : sel));
     } else if (movingSelection && moveStartGridRef.current) {
@@ -812,6 +850,12 @@ export default function SahabatKuApp() {
       pushHistory(draftRef.current);
       draftRef.current = null;
       lastPaintRef.current = null;
+    } else if (isDrawing && (activeTool === "line" || activeTool === "rect")) {
+      pushHistory(draftRef.current);
+      addRecentColor(activeColor);
+      draftRef.current = null;
+      shapeBaselineRef.current = null;
+      shapeStartRef.current = null;
     } else if (isDrawing && activeTool === "select") {
       setSelection((sel) =>
         sel
@@ -827,6 +871,7 @@ export default function SahabatKuApp() {
       pushHistory(draftRef.current);
       draftRef.current = null;
       movingBlockRef.current = null;
+      moveBaselineRef.current = null;
     } else if (draggingStamp) {
       pushHistory(draftRef.current);
       draftRef.current = null;
@@ -1112,7 +1157,9 @@ export default function SahabatKuApp() {
       {/* ---------- top bar ---------- */}
       <div className="flex items-center gap-3 px-4 h-14 shrink-0 border-b" style={{ background: C.panel, borderColor: C.line }}>
         <div className="flex items-center gap-2 mr-1">
-          <img src="/logo.png" alt="SahabatKu" style={{ width: 24, height: 24, borderRadius: 4, objectFit: "cover" }} />
+          <div style={{ background: C.gold, width: 22, height: 22, borderRadius: 4 }} className="flex items-center justify-center">
+            <span style={{ color: C.chrome, fontSize: 12, fontWeight: 700 }}>ﮐ</span>
+          </div>
           <span style={{ fontFamily: "'Amiri', serif", fontSize: 20, letterSpacing: 0.3 }}>SahabatKu</span>
         </div>
         <div className="w-px h-6" style={{ background: C.line }} />
@@ -1146,6 +1193,8 @@ export default function SahabatKuApp() {
           <ToolBtn active={activeTool === "eraser"} title="Penghapus (klik & seret — juga menghapus stempel)" onClick={() => setActiveTool("eraser")}><Eraser size={18} /></ToolBtn>
           <ToolBtn active={activeTool === "select"} title="Pilih / Select" onClick={() => setActiveTool("select")}><MousePointer2 size={18} /></ToolBtn>
           <ToolBtn active={activeTool === "bucket"} title="Paint Bucket" onClick={() => setActiveTool("bucket")}><PaintBucket size={18} /></ToolBtn>
+          <ToolBtn active={activeTool === "line"} title="Line (klik & seret)" onClick={() => setActiveTool("line")}><Slash size={18} /></ToolBtn>
+          <ToolBtn active={activeTool === "rect"} title="Rectangle (klik & seret)" onClick={() => setActiveTool("rect")}><Square size={18} /></ToolBtn>
           <div className="w-8 h-px my-1" style={{ background: C.line }} />
           <ToolBtn title="Rotasi objek terpilih 90°" disabled={!hasActiveObject} onClick={rotateActive}><RotateCw size={18} /></ToolBtn>
           <ToolBtn active={activeTool === "stamp"} title="Stempel" onClick={() => setActiveTool("stamp")}><Stamp size={18} /></ToolBtn>
@@ -1153,14 +1202,25 @@ export default function SahabatKuApp() {
 
         {/* canvas stage */}
         <div className="flex-1 min-w-0 flex flex-col items-center justify-center relative" style={{ background: "#12151A" }}>
-          {hasActiveObject && (
+          {hasActiveObject ? (
             <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
               <span className="text-xs" style={{ color: C.muted }}>{selection ? "Seleksi aktif" : "Stempel terpilih"}</span>
               <button className="flex items-center gap-1 text-xs px-2 py-1 rounded" style={{ background: C.goldSoft, color: C.gold }} onClick={rotateActive}><RotateCw size={13} /> Rotasi 90°</button>
               <button className="flex items-center gap-1 text-xs px-2 py-1 rounded" style={{ background: "rgba(209,73,91,0.15)", color: C.danger }} onClick={deleteActive}><Trash2 size={13} /> Hapus</button>
               <button className="p-1 rounded" style={{ color: C.muted }} onClick={() => { setSelection(null); setSelectedStampId(null); }}><X size={14} /></button>
             </div>
-          )}
+          ) : activeTool === "rect" ? (
+            <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
+              <span className="text-xs" style={{ color: C.muted }}>Kotak</span>
+              <button
+                onClick={() => setRectFilled((f) => !f)}
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded"
+                style={{ background: rectFilled ? C.goldSoft : "transparent", color: rectFilled ? C.gold : C.text, border: `1px solid ${C.line}` }}
+              >
+                <Square size={13} /> {rectFilled ? "Terisi" : "Garis Tepi"}
+              </button>
+            </div>
+          ) : null}
           <div className="max-w-full max-h-full overflow-auto p-6">
             <canvas
               ref={canvasRef}
@@ -1175,7 +1235,7 @@ export default function SahabatKuApp() {
             />
           </div>
           <p className="text-xs pb-3" style={{ color: C.muted }}>
-            Klik lalu seret untuk pensil/penghapus. Untuk stempel, arahkan kursor untuk melihat pratinjau transparan sebelum klik.
+            Klik lalu seret untuk pensil/penghapus/line/rectangle. Untuk stempel, arahkan kursor untuk melihat pratinjau transparan sebelum klik.
           </p>
         </div>
 
@@ -1216,6 +1276,7 @@ export default function SahabatKuApp() {
                   </div>
                 )}
                 <ToggleRow label="Tampilkan Grid" checked={showGrid} onChange={setShowGrid} />
+                <ToggleRow label="Grid Alternatif (kotak selang-seling)" checked={showAltShading} onChange={setShowAltShading} />
                 <p className="text-xs mt-1.5 leading-relaxed" style={{ color: C.muted }}>Ubah ukuran grid akan menskalakan ulang gambar bebas. Stempel tidak berubah karena tersimpan sebagai objek.</p>
               </Panel>
 

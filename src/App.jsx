@@ -4,9 +4,9 @@ import {
   Eye, EyeOff, Lock, Unlock, Copy, ChevronUp, ChevronDown, ChevronRight, ChevronLeft, Undo2, Redo2,
   ZoomIn, ZoomOut, FilePlus2, FolderOpen, Save, Image as ImageIcon, FileText,
   Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Upload,
-  Slash, Square, Pin
+  Slash, Square
 } from "lucide-react";
-import customLogo from "./logo.png"; // Pastikan file logo.png ada di folder yang sama
+import customLogo from "./logo.png";
 
 /* ---------------------------------- tokens --------------------------------- */
 const C = {
@@ -67,51 +67,15 @@ const STAMP_SHAPES = {
   "ya": [[0, 0], [2, 0], [3, 0], [4, 0], [0, 1], [2, 1], [0, 2], [2, 2], [3, 2], [4, 2], [0, 3], [4, 3], [0, 4], [1, 4], [2, 4], [3, 4], [4, 4]],
   "ya-7": [[0, 0], [2, 0], [3, 0], [4, 0], [0, 1], [2, 1], [4, 1], [0, 2], [2, 2], [4, 2], [0, 3], [2, 3], [0, 4], [2, 4], [3, 4], [4, 4], [0, 5], [4, 5], [0, 6], [1, 6], [2, 6], [3, 6], [4, 6]],
 };
-
 const STAMP_LABELS = {
-  "allah": "Allah",
-  "muhammad": "Muhammad",
-  "alif": "Alif",
-  "ba": "Ba",
-  "ba-5": "Ba-5",
-  "ba-7": "Ba-7",
-  "ta": "Ta",
-  "tsa": "Tsa",
-  "jim": "Jim",
-  "jim-5": "Jim-5",
-  "ha": "Ha",
-  "dal": "Dal",
-  "dal-5": "Dal-5",
-  "ra": "Ra",
-  "sin": "Sin",
-  "shad": "Shad",
-  "tha": "Tha",
-  "tha-5": "Tha-5",
-  "ain": "Ain",
-  "ain-7": "Ain-7",
-  "fa": "Fa",
-  "kaf": "Kaf",
-  "rumahkaf": "RumahKaf",
-  "rumahkaf-7": "RumahKaf-7",
-  "lam": "Lam",
-  "lam-5": "Lam-5",
-  "mim": "Mim",
-  "mim-5": "Mim-5",
-  "nun": "Nun",
-  "nun-5": "Nun-5",
-  "wau": "Wau",
-  "waw-7": "Waw-7",
-  "hha": "Hha",
-  "hha-5": "Hha-5",
-  "hha-7": "Hha-7",
-  "lamalif": "Lamalif",
-  "lamalif-5": "Lamalif-5",
-  "hamzah": "Hamzah",
-  "hamzah-5": "Hamzah-5",
-  "ya": "Ya",
-  "ya-7": "Ya-7",
+  "allah": "Allah", "muhammad": "Muhammad", "alif": "Alif", "ba": "Ba", "ba-5": "Ba-5", "ba-7": "Ba-7",
+  "ta": "Ta", "tsa": "Tsa", "jim": "Jim", "jim-5": "Jim-5", "ha": "Ha", "dal": "Dal", "dal-5": "Dal-5",
+  "ra": "Ra", "sin": "Sin", "shad": "Shad", "tha": "Tha", "tha-5": "Tha-5", "ain": "Ain", "ain-7": "Ain-7",
+  "fa": "Fa", "kaf": "Kaf", "rumahkaf": "RumahKaf", "rumahkaf-7": "RumahKaf-7", "lam": "Lam", "lam-5": "Lam-5",
+  "mim": "Mim", "mim-5": "Mim-5", "nun": "Nun", "nun-5": "Nun-5", "wau": "Wau", "waw-7": "Waw-7",
+  "hha": "Hha", "hha-5": "Hha-5", "hha-7": "Hha-7", "lamalif": "Lamalif", "lamalif-5": "Lamalif-5",
+  "hamzah": "Hamzah", "hamzah-5": "Hamzah-5", "ya": "Ya", "ya-7": "Ya-7",
 };
-
 const STAMP_ORDER = [
   "allah", "muhammad", "alif", "ba", "ba-5", "ba-7", "ta", "tsa", "jim", "jim-5", 
   "ha", "dal", "dal-5", "ra", "sin", "shad", "tha", "tha-5", "ain", "ain-7", "fa", 
@@ -119,21 +83,11 @@ const STAMP_ORDER = [
   "wau", "waw-7", "hha", "hha-5", "hha-7", "lamalif", "lamalif-5", "hamzah", "hamzah-5", 
   "ya", "ya-7"
 ];
-
 const BUILTIN_STAMPS = STAMP_ORDER.map((id) => {
   const cells = STAMP_SHAPES[id];
   const maxX = Math.max(...cells.map(coord => coord[0]));
   const maxY = Math.max(...cells.map(coord => coord[1]));
-  
-  return {
-    id, 
-    kind: "cells", 
-    w: maxX + 1,
-    h: maxY + 1, 
-    cells: cells, 
-    label: STAMP_LABELS[id], 
-    builtin: true,
-  };
+  return { id, kind: "cells", w: maxX + 1, h: maxY + 1, cells: cells, label: STAMP_LABELS[id], builtin: true };
 });
 const MAX_STAMP = 64; 
 
@@ -214,6 +168,8 @@ const GRID_PRESETS = [
   { label: "64×64", cols: 64, rows: 64 },
 ];
 
+const ZOOM_STEPS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5];
+
 function uid() { return Math.random().toString(36).slice(2, 10); }
 function makeLayer(name) { return { id: uid(), name, visible: true, locked: false, opacity: 1, cells: {}, stamps: [] }; }
 function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -273,11 +229,8 @@ export default function SahabatKuApp() {
   const [draggingStamp, setDraggingStamp] = useState(false);
   const [, forceTick] = useState(0);
   
-  // SIDEBAR STATE UPDATE: Explicit toggle for better mobile UX
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
-
-  const pinchStartDistRef = useRef(null);
-  const pinchStartZoomRef = useRef(null);
+  // Default tertutup di HP agar canvas terlihat.
+  const [sidebarExpanded, setSidebarExpanded] = useState(window.innerWidth > 768);
 
   // Define panels state mapping
   const [panels, setPanels] = useState({
@@ -295,7 +248,6 @@ export default function SahabatKuApp() {
   }
   function openPanel(key) {
     if(!sidebarExpanded) setSidebarExpanded(true);
-    // Expand the specific panel
     setPanels((p) => ({ ...p, [key]: { open: true, collapsed: false } }));
   }
 
@@ -342,11 +294,7 @@ export default function SahabatKuApp() {
   }
   const canUndo = historyIndexRef.current > 0;
   const canRedo = historyIndexRef.current < historyRef.current.length - 1;
-
-  function commit(nextProject) {
-    setProject(nextProject);
-    pushHistory(nextProject);
-  }
+  function commit(nextProject) { setProject(nextProject); pushHistory(nextProject); }
 
   /* --------------------------- helpers --------------------------- */
   const activeLayer = project.layers.find((l) => l.id === project.activeLayerId);
@@ -419,60 +367,38 @@ export default function SahabatKuApp() {
       ctx.strokeStyle = "rgba(20,20,30,0.38)";
       ctx.lineWidth = 1;
       for (let x = 0; x <= gridCols; x++) {
-        ctx.beginPath();
-        ctx.moveTo(x * cellPx + 0.5, 0);
-        ctx.lineTo(x * cellPx + 0.5, gridRows * cellPx);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x * cellPx + 0.5, 0); ctx.lineTo(x * cellPx + 0.5, gridRows * cellPx); ctx.stroke();
       }
       for (let y = 0; y <= gridRows; y++) {
-        ctx.beginPath();
-        ctx.moveTo(0, y * cellPx + 0.5);
-        ctx.lineTo(gridCols * cellPx, y * cellPx + 0.5);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, y * cellPx + 0.5); ctx.lineTo(gridCols * cellPx, y * cellPx + 0.5); ctx.stroke();
       }
     }
 
     if (selection) {
-      const sx = Math.min(selection.x0, selection.x1);
-      const sy = Math.min(selection.y0, selection.y1);
-      const ex = Math.max(selection.x0, selection.x1);
-      const ey = Math.max(selection.y0, selection.y1);
-      ctx.fillStyle = C.tealSoft;
-      ctx.fillRect(sx * cellPx, sy * cellPx, (ex - sx + 1) * cellPx, (ey - sy + 1) * cellPx);
-      ctx.strokeStyle = C.teal;
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      ctx.strokeRect(sx * cellPx + 1, sy * cellPx + 1, (ex - sx + 1) * cellPx - 2, (ey - sy + 1) * cellPx - 2);
-      ctx.setLineDash([]);
+      const sx = Math.min(selection.x0, selection.x1), sy = Math.min(selection.y0, selection.y1);
+      const ex = Math.max(selection.x0, selection.x1), ey = Math.max(selection.y0, selection.y1);
+      ctx.fillStyle = C.tealSoft; ctx.fillRect(sx * cellPx, sy * cellPx, (ex - sx + 1) * cellPx, (ey - sy + 1) * cellPx);
+      ctx.strokeStyle = C.teal; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.strokeRect(sx * cellPx + 1, sy * cellPx + 1, (ex - sx + 1) * cellPx - 2, (ey - sy + 1) * cellPx - 2); ctx.setLineDash([]);
     }
     if (selectedStampId) {
       const layer = project.layers.find((l) => l.id === project.activeLayerId);
       const st = layer && layer.stamps.find((s) => s.id === selectedStampId);
       if (st) {
         const { w, h } = getEffectiveFootprint(st);
-        ctx.strokeStyle = C.gold;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(st.gx * cellPx + 1, st.gy * cellPx + 1, w * cellPx - 2, h * cellPx - 2);
+        ctx.strokeStyle = C.gold; ctx.lineWidth = 2; ctx.strokeRect(st.gx * cellPx + 1, st.gy * cellPx + 1, w * cellPx - 2, h * cellPx - 2);
       }
     }
 
     if (activeTool === "stamp" && hoverCell && !draggingStamp && !isDrawing) {
       const steps = rotSteps(nextStampRotation);
       const { w: effW, h: effH } = rotatedDims(nextFootprintW, nextFootprintH, steps);
-      const maxX = Math.max(0, gridCols - effW);
-      const maxY = Math.max(0, gridRows - effH);
-      const ggx = Math.max(0, Math.min(hoverCell.gx, maxX));
-      const ggy = Math.max(0, Math.min(hoverCell.gy, maxY));
-      const ghost =
-        chosenStamp.kind === "image"
+      const ggx = Math.max(0, Math.min(hoverCell.gx, Math.max(0, gridCols - effW)));
+      const ggy = Math.max(0, Math.min(hoverCell.gy, Math.max(0, gridRows - effH)));
+      const ghost = chosenStamp.kind === "image"
           ? { type: "image", imageSrc: chosenStamp.dataUrl, gx: ggx, gy: ggy, rotation: nextStampRotation, footprintW: nextFootprintW, footprintH: nextFootprintH }
           : { type: "cells", cells: chosenStamp.cells, patternW: chosenStamp.w, patternH: chosenStamp.h, gx: ggx, gy: ggy, rotation: nextStampRotation, footprintW: nextFootprintW, footprintH: nextFootprintH, color: activeColor };
       drawStampOnCtx(ctx, ghost, cellPx, imageCacheRef, undefined, 0.4);
-      ctx.strokeStyle = C.gold;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 3]);
-      ctx.strokeRect(ggx * cellPx + 1, ggy * cellPx + 1, effW * cellPx - 2, effH * cellPx - 2);
-      ctx.setLineDash([]);
+      ctx.strokeStyle = C.gold; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]); ctx.strokeRect(ggx * cellPx + 1, ggy * cellPx + 1, effW * cellPx - 2, effH * cellPx - 2); ctx.setLineDash([]);
     }
   }, [project, gridCols, gridRows, showGrid, showAltShading, zoom, selection, selectedStampId, activeTool, hoverCell, chosenStamp, nextStampRotation, nextFootprintW, nextFootprintH, activeColor, draggingStamp, isDrawing]);
 
@@ -482,16 +408,12 @@ export default function SahabatKuApp() {
   /* --------------------------- pixel-cell painting --------------------------- */
   function beginStroke() { draftRef.current = deepClone(project); }
   function bresenhamLine(x0, y0, x1, y1) {
-    const points = [];
-    let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+    const points = []; let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
     let sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
     let err = dx - dy, x = x0, y = y0;
     while (true) {
-      points.push([x, y]);
-      if (x === x1 && y === y1) break;
-      const e2 = 2 * err;
-      if (e2 > -dy) { err -= dy; x += sx; }
-      if (e2 < dx) { err += dx; y += sy; }
+      points.push([x, y]); if (x === x1 && y === y1) break;
+      const e2 = 2 * err; if (e2 > -dy) { err -= dy; x += sx; } if (e2 < dx) { err += dx; y += sy; }
     }
     return points;
   }
@@ -500,8 +422,7 @@ export default function SahabatKuApp() {
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
     bresenhamLine(from.gx, from.gy, to.gx, to.gy).forEach(([x, y]) => {
       const key = `${x},${y}`;
-      if (color === null) delete layer.cells[key];
-      else layer.cells[key] = color;
+      if (color === null) delete layer.cells[key]; else layer.cells[key] = color;
     });
     setProject({ ...next });
   }
@@ -521,21 +442,18 @@ export default function SahabatKuApp() {
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
     const target = layer.cells[`${gx},${gy}`] ?? null;
     if (target === fillColor) return;
-    const stack = [[gx, gy]];
-    const visited = new Set();
+    const stack = [[gx, gy]]; const visited = new Set();
     while (stack.length) {
       const [x, y] = stack.pop();
       if (x < 0 || y < 0 || x >= gridCols || y >= gridRows) continue;
       const key = `${x},${y}`;
-      if (visited.has(key)) continue;
-      visited.add(key);
+      if (visited.has(key)) continue; visited.add(key);
       const cur = layer.cells[key] ?? null;
       if (cur !== target) continue;
       layer.cells[key] = fillColor;
       stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
     }
-    commit(next);
-    addRecentColor(fillColor);
+    commit(next); addRecentColor(fillColor);
   }
 
   /* --------------------------- selection --------------------------- */
@@ -546,8 +464,7 @@ export default function SahabatKuApp() {
       const [rx, ry] = relKey.split(",").map(Number);
       layer.cells[`${newX0 + rx},${newY0 + ry}`] = color;
     });
-    setProject(next);
-    draftRef.current = next;
+    setProject(next); draftRef.current = next;
     const { w, h } = moveDimRef.current;
     setSelection({ x0: newX0, y0: newY0, x1: newX0 + w - 1, y1: newY0 + h - 1 });
   }
@@ -555,56 +472,41 @@ export default function SahabatKuApp() {
     if (!selection || !activeLayer) return;
     const next = deepClone(project);
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    const x0 = Math.min(selection.x0, selection.x1);
-    const y0 = Math.min(selection.y0, selection.y1);
-    const x1 = Math.max(selection.x0, selection.x1);
-    const y1 = Math.max(selection.y0, selection.y1);
-    const w = x1 - x0 + 1;
-    const h = y1 - y0 + 1;
-    const nx0 = Math.min(x0, Math.max(0, gridCols - h));
-    const ny0 = Math.min(y0, Math.max(0, gridRows - w));
+    const x0 = Math.min(selection.x0, selection.x1), y0 = Math.min(selection.y0, selection.y1);
+    const x1 = Math.max(selection.x0, selection.x1), y1 = Math.max(selection.y0, selection.y1);
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    const nx0 = Math.min(x0, Math.max(0, gridCols - h)), ny0 = Math.min(y0, Math.max(0, gridRows - w));
     const oldBlock = {};
     for (let x = x0; x <= x1; x++)
       for (let y = y0; y <= y1; y++) {
         const k = `${x},${y}`;
-        if (layer.cells[k] !== undefined) {
-          oldBlock[`${x - x0},${y - y0}`] = layer.cells[k];
-          delete layer.cells[k];
-        }
+        if (layer.cells[k] !== undefined) { oldBlock[`${x - x0},${y - y0}`] = layer.cells[k]; delete layer.cells[k]; }
       }
     Object.entries(oldBlock).forEach(([relKey, color]) => {
       const [lx, ly] = relKey.split(",").map(Number);
-      const nlx = h - 1 - ly;
-      const nly = lx;
-      layer.cells[`${nx0 + nlx},${ny0 + nly}`] = color;
+      layer.cells[`${nx0 + (h - 1 - ly)},${ny0 + lx}`] = color;
     });
-    commit(next);
-    setSelection({ x0: nx0, y0: ny0, x1: nx0 + h - 1, y1: ny0 + w - 1 });
+    commit(next); setSelection({ x0: nx0, y0: ny0, x1: nx0 + h - 1, y1: ny0 + w - 1 });
   }
   function deleteSelection() {
     if (!selection) return;
     const next = deepClone(project);
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    const x0 = Math.min(selection.x0, selection.x1);
-    const y0 = Math.min(selection.y0, selection.y1);
-    const x1 = Math.max(selection.x0, selection.x1);
-    const y1 = Math.max(selection.y0, selection.y1);
+    const x0 = Math.min(selection.x0, selection.x1), y0 = Math.min(selection.y0, selection.y1);
+    const x1 = Math.max(selection.x0, selection.x1), y1 = Math.max(selection.y0, selection.y1);
     for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) delete layer.cells[`${x},${y}`];
-    commit(next);
-    setSelection(null);
+    commit(next); setSelection(null);
   }
 
   /* --------------------------- stamps --------------------------- */
   function placeStamp(gx, gy) {
     if (!activeLayer || activeLayer.locked || !chosenStamp) return;
-    const footprintW = Math.max(1, nextFootprintW);
-    const footprintH = Math.max(1, nextFootprintH);
+    const footprintW = Math.max(1, nextFootprintW), footprintH = Math.max(1, nextFootprintH);
     const steps = rotSteps(nextStampRotation);
     const { w: effW, h: effH } = rotatedDims(footprintW, footprintH, steps);
     const cgx = Math.max(0, Math.min(gx, Math.max(0, gridCols - effW)));
     const cgy = Math.max(0, Math.min(gy, Math.max(0, gridRows - effH)));
-    const stamp =
-      chosenStamp.kind === "image"
+    const stamp = chosenStamp.kind === "image"
         ? { id: uid(), type: "image", imageSrc: chosenStamp.dataUrl, gx: cgx, gy: cgy, rotation: nextStampRotation, footprintW, footprintH }
         : { id: uid(), type: "cells", cells: chosenStamp.cells, patternW: chosenStamp.w, patternH: chosenStamp.h, gx: cgx, gy: cgy, rotation: nextStampRotation, footprintW, footprintH, color: activeColor };
     const next = deepClone(project);
@@ -616,9 +518,8 @@ export default function SahabatKuApp() {
   }
   function findStampAt(gx, gy) {
     if (!activeLayer) return null;
-    const stamps = activeLayer.stamps || [];
-    for (let i = stamps.length - 1; i >= 0; i--) {
-      const st = stamps[i];
+    for (let i = activeLayer.stamps.length - 1; i >= 0; i--) {
+      const st = activeLayer.stamps[i];
       const { w, h } = getEffectiveFootprint(st);
       if (gx >= st.gx && gx <= st.gx + w - 1 && gy >= st.gy && gy <= st.gy + h - 1) return st;
     }
@@ -629,87 +530,55 @@ export default function SahabatKuApp() {
     const next = deepClone(project);
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
     const st = layer.stamps.find((s) => s.id === selectedStampId);
-    if (!st) return;
-    st.rotation = (st.rotation + 90) % 360;
-    commit(next);
+    if (!st) return; st.rotation = (st.rotation + 90) % 360; commit(next);
   }
   function deleteSelectedStamp() {
     if (!selectedStampId) return;
     const next = deepClone(project);
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
     layer.stamps = layer.stamps.filter((s) => s.id !== selectedStampId);
-    commit(next);
-    setSelectedStampId(null);
+    commit(next); setSelectedStampId(null);
   }
   function updateStampColor(id, color) {
     const next = deepClone(project);
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
     const st = layer.stamps.find((s) => s.id === id);
-    if (!st || st.type === "image") return;
-    st.color = color;
-    commit(next);
+    if (!st || st.type === "image") return; st.color = color; commit(next);
   }
   function handleUploadStamp(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       const entry = { id: uid(), kind: "image", name: file.name.replace(/\.[^.]+$/, ""), label: file.name.replace(/\.[^.]+$/, ""), dataUrl: ev.target.result };
-      setCustomImageStamps((prev) => [...prev, entry]);
-      setStampChoiceId(entry.id);
-      setActiveTool("stamp");
+      setCustomImageStamps((prev) => [...prev, entry]); setStampChoiceId(entry.id); setActiveTool("stamp");
     };
-    reader.readAsDataURL(file);
-    e.target.value = "";
+    reader.readAsDataURL(file); e.target.value = "";
   }
   function handleAddCsvStamp() {
     const parsed = parseStampCSV(csvText);
-    if (!parsed || parsed.cells.length === 0) {
-      window.alert(`Format CSV tidak valid atau kosong.`);
-      return;
-    }
+    if (!parsed || parsed.cells.length === 0) return window.alert(`Format CSV tidak valid.`);
     const entry = { id: uid(), kind: "cells", w: parsed.w, h: parsed.h, cells: parsed.cells, label: csvName.trim() || "Stempel CSV" };
-    setCustomCsvStamps((prev) => [...prev, entry]);
-    setStampChoiceId(entry.id);
-    setActiveTool("stamp");
-    setCsvText("");
-    setCsvName("");
-    setShowCsvForm(false);
+    setCustomCsvStamps((prev) => [...prev, entry]); setStampChoiceId(entry.id); setActiveTool("stamp");
+    setCsvText(""); setCsvName(""); setShowCsvForm(false);
   }
-
-  function rotateActive() {
-    if (selection) rotateSelection();
-    else if (selectedStampId) rotateSelectedStamp();
-  }
-  function deleteActive() {
-    if (selection) deleteSelection();
-    else if (selectedStampId) deleteSelectedStamp();
-  }
+  function rotateActive() { if (selection) rotateSelection(); else if (selectedStampId) rotateSelectedStamp(); }
+  function deleteActive() { if (selection) deleteSelection(); else if (selectedStampId) deleteSelectedStamp(); }
 
   /* --------------------------- pointer handlers --------------------------- */
   function handlePointerDown(e) {
     if (e.touches && e.touches.length > 1) return;
-    
     e.preventDefault();
     try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
-    const { gx, gy } = getGridCoords(e);
-    setHoverCell({ gx, gy });
+    const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (!activeLayer || activeLayer.locked) return;
 
     if (activeTool === "pencil" || activeTool === "eraser") {
       beginStroke();
       if (activeTool === "eraser") eraseLineLive({ gx, gy }, { gx, gy });
-      else {
-        paintLineLive({ gx, gy }, { gx, gy }, activeColor);
-        addRecentColor(activeColor);
-      }
-      lastPaintRef.current = { gx, gy };
-      setIsDrawing(true);
+      else { paintLineLive({ gx, gy }, { gx, gy }, activeColor); addRecentColor(activeColor); }
+      lastPaintRef.current = { gx, gy }; setIsDrawing(true);
     } else if (activeTool === "line" || activeTool === "rect") {
-      beginStroke();
-      shapeBaselineRef.current = deepClone(draftRef.current);
-      shapeStartRef.current = { gx, gy };
-      setIsDrawing(true);
+      beginStroke(); shapeBaselineRef.current = deepClone(draftRef.current); shapeStartRef.current = { gx, gy }; setIsDrawing(true);
     } else if (activeTool === "bucket") {
       bucketFill(gx, gy, activeColor);
     } else if (activeTool === "stamp") {
@@ -717,99 +586,60 @@ export default function SahabatKuApp() {
     } else if (activeTool === "select") {
       const stampHit = findStampAt(gx, gy);
       if (stampHit) {
-        setSelection(null);
-        setSelectedStampId(stampHit.id);
-        beginStroke();
-        stampDragAnchorRef.current = { gx, gy };
-        stampOrigRef.current = { gx: stampHit.gx, gy: stampHit.gy };
-        setDraggingStamp(true);
-        return;
+        setSelection(null); setSelectedStampId(stampHit.id); beginStroke();
+        stampDragAnchorRef.current = { gx, gy }; stampOrigRef.current = { gx: stampHit.gx, gy: stampHit.gy };
+        setDraggingStamp(true); return;
       }
       setSelectedStampId(null);
-      if (
-        selection && gx >= Math.min(selection.x0, selection.x1) && gx <= Math.max(selection.x0, selection.x1) &&
-        gy >= Math.min(selection.y0, selection.y1) && gy <= Math.max(selection.y0, selection.y1)
-      ) {
-        const x0 = Math.min(selection.x0, selection.x1);
-        const y0 = Math.min(selection.y0, selection.y1);
-        const x1 = Math.max(selection.x0, selection.x1);
-        const y1 = Math.max(selection.y0, selection.y1);
-        const w = x1 - x0 + 1;
-        const h = y1 - y0 + 1;
+      if (selection && gx >= Math.min(selection.x0, selection.x1) && gx <= Math.max(selection.x0, selection.x1) &&
+          gy >= Math.min(selection.y0, selection.y1) && gy <= Math.max(selection.y0, selection.y1)) {
+        const x0 = Math.min(selection.x0, selection.x1), y0 = Math.min(selection.y0, selection.y1);
+        const w = Math.max(selection.x0, selection.x1) - x0 + 1, h = Math.max(selection.y0, selection.y1) - y0 + 1;
         beginStroke();
-        const next = draftRef.current;
-        const layer = next.layers.find((l) => l.id === next.activeLayerId);
-        const block = {};
-        for (let x = x0; x <= x1; x++)
-          for (let y = y0; y <= y1; y++) {
-            const k = `${x},${y}`;
-            if (layer.cells[k] !== undefined) {
-              block[`${x - x0},${y - y0}`] = layer.cells[k];
-              delete layer.cells[k];
-            }
-          }
-        movingBlockRef.current = block;
-        moveBaselineRef.current = deepClone(next);
-        moveAnchorRef.current = { x0, y0 };
-        moveDimRef.current = { w, h };
-        moveStartGridRef.current = { gx, gy };
-        setProject({ ...next });
-        setMovingSelection(true);
+        const next = draftRef.current, layer = next.layers.find((l) => l.id === next.activeLayerId), block = {};
+        for (let x = x0; x < x0 + w; x++) for (let y = y0; y < y0 + h; y++) {
+          const k = `${x},${y}`; if (layer.cells[k] !== undefined) { block[`${x - x0},${y - y0}`] = layer.cells[k]; delete layer.cells[k]; }
+        }
+        movingBlockRef.current = block; moveBaselineRef.current = deepClone(next);
+        moveAnchorRef.current = { x0, y0 }; moveDimRef.current = { w, h }; moveStartGridRef.current = { gx, gy };
+        setProject({ ...next }); setMovingSelection(true);
       } else {
-        setIsDrawing(true);
-        setSelection({ x0: gx, y0: gy, x1: gx, y1: gy });
+        setIsDrawing(true); setSelection({ x0: gx, y0: gy, x1: gx, y1: gy });
       }
     }
   }
 
   function handlePointerMove(e) {
     if (e.touches && e.touches.length > 1) return;
-    const { gx, gy } = getGridCoords(e);
-    setHoverCell({ gx, gy });
+    const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
       const from = lastPaintRef.current || { gx, gy };
-      if (activeTool === "eraser") eraseLineLive(from, { gx, gy });
-      else paintLineLive(from, { gx, gy }, activeColor);
+      if (activeTool === "eraser") eraseLineLive(from, { gx, gy }); else paintLineLive(from, { gx, gy }, activeColor);
       lastPaintRef.current = { gx, gy };
     } else if (isDrawing && (activeTool === "line" || activeTool === "rect") && shapeStartRef.current) {
-      const next = deepClone(shapeBaselineRef.current);
-      const layer = next.layers.find((l) => l.id === next.activeLayerId);
+      const next = deepClone(shapeBaselineRef.current), layer = next.layers.find((l) => l.id === next.activeLayerId);
       const { gx: sx, gy: sy } = shapeStartRef.current;
-      if (activeTool === "line") {
-        bresenhamLine(sx, sy, gx, gy).forEach(([x, y]) => { layer.cells[`${x},${y}`] = activeColor; });
-      } else {
-        const x0 = Math.min(sx, gx), x1 = Math.max(sx, gx);
-        const y0 = Math.min(sy, gy), y1 = Math.max(sy, gy);
-        for (let x = x0; x <= x1; x++) {
-          for (let y = y0; y <= y1; y++) {
-            const onBorder = x === x0 || x === x1 || y === y0 || y === y1;
-            if (rectFilled || onBorder) layer.cells[`${x},${y}`] = activeColor;
-          }
+      if (activeTool === "line") { bresenhamLine(sx, sy, gx, gy).forEach(([x, y]) => { layer.cells[`${x},${y}`] = activeColor; }); }
+      else {
+        const x0 = Math.min(sx, gx), x1 = Math.max(sx, gx), y0 = Math.min(sy, gy), y1 = Math.max(sy, gy);
+        for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) {
+          if (rectFilled || x === x0 || x === x1 || y === y0 || y === y1) layer.cells[`${x},${y}`] = activeColor;
         }
       }
-      setProject(next);
-      draftRef.current = next;
+      setProject(next); draftRef.current = next;
     } else if (isDrawing && activeTool === "select") {
       setSelection((sel) => (sel ? { ...sel, x1: gx, y1: gy } : sel));
     } else if (movingSelection && moveStartGridRef.current) {
-      const dx = gx - moveStartGridRef.current.gx;
-      const dy = gy - moveStartGridRef.current.gy;
       const { w, h } = moveDimRef.current;
-      const newX0 = Math.max(0, Math.min(gridCols - w, moveAnchorRef.current.x0 + dx));
-      const newY0 = Math.max(0, Math.min(gridRows - h, moveAnchorRef.current.y0 + dy));
+      const newX0 = Math.max(0, Math.min(gridCols - w, moveAnchorRef.current.x0 + (gx - moveStartGridRef.current.gx)));
+      const newY0 = Math.max(0, Math.min(gridRows - h, moveAnchorRef.current.y0 + (gy - moveStartGridRef.current.gy)));
       updateMovePreview(newX0, newY0);
     } else if (draggingStamp && selectedStampId && stampDragAnchorRef.current) {
-      const next = draftRef.current;
-      const layer = next.layers.find((l) => l.id === next.activeLayerId);
-      const st = layer.stamps.find((s) => s.id === selectedStampId);
+      const next = draftRef.current, st = next.layers.find((l) => l.id === next.activeLayerId).stamps.find((s) => s.id === selectedStampId);
       if (st) {
         const { w, h } = getEffectiveFootprint(st);
-        const dx = gx - stampDragAnchorRef.current.gx;
-        const dy = gy - stampDragAnchorRef.current.gy;
-        const newGx = Math.max(0, Math.min(Math.max(0, gridCols - w), stampOrigRef.current.gx + dx));
-        const newGy = Math.max(0, Math.min(Math.max(0, gridRows - h), stampOrigRef.current.gy + dy));
-        st.gx = newGx;
-        st.gy = newGy;
+        st.gx = Math.max(0, Math.min(Math.max(0, gridCols - w), stampOrigRef.current.gx + (gx - stampDragAnchorRef.current.gx)));
+        st.gy = Math.max(0, Math.min(Math.max(0, gridRows - h), stampOrigRef.current.gy + (gy - stampDragAnchorRef.current.gy)));
         setProject({ ...next });
       }
     }
@@ -819,329 +649,116 @@ export default function SahabatKuApp() {
     if (e.touches && e.touches.length > 1) return;
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
       if (activeTool === "eraser" && selectedStampId && draftRef.current) {
-        const layer = draftRef.current.layers.find((l) => l.id === draftRef.current.activeLayerId);
-        if (!layer || !layer.stamps.find((s) => s.id === selectedStampId)) setSelectedStampId(null);
+        if (!draftRef.current.layers.find((l) => l.id === draftRef.current.activeLayerId)?.stamps.find((s) => s.id === selectedStampId)) setSelectedStampId(null);
       }
-      pushHistory(draftRef.current);
-      draftRef.current = null;
-      lastPaintRef.current = null;
+      pushHistory(draftRef.current); draftRef.current = null; lastPaintRef.current = null;
     } else if (isDrawing && (activeTool === "line" || activeTool === "rect")) {
-      pushHistory(draftRef.current);
-      addRecentColor(activeColor);
-      draftRef.current = null;
-      shapeBaselineRef.current = null;
-      shapeStartRef.current = null;
+      pushHistory(draftRef.current); addRecentColor(activeColor); draftRef.current = null; shapeBaselineRef.current = null; shapeStartRef.current = null;
     } else if (isDrawing && activeTool === "select") {
       setSelection((sel) => sel ? { x0: Math.min(sel.x0, sel.x1), y0: Math.min(sel.y0, sel.y1), x1: Math.max(sel.x0, sel.x1), y1: Math.max(sel.y0, sel.y1) } : sel);
-    } else if (movingSelection) {
-      pushHistory(draftRef.current);
-      draftRef.current = null;
-      movingBlockRef.current = null;
-      moveBaselineRef.current = null;
-    } else if (draggingStamp) {
-      pushHistory(draftRef.current);
-      draftRef.current = null;
-    }
-    setIsDrawing(false);
-    setMovingSelection(false);
-    setDraggingStamp(false);
+    } else if (movingSelection) { pushHistory(draftRef.current); draftRef.current = null; movingBlockRef.current = null; moveBaselineRef.current = null;
+    } else if (draggingStamp) { pushHistory(draftRef.current); draftRef.current = null; }
+    setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
     try { canvasRef.current && canvasRef.current.releasePointerCapture(e.pointerId); } catch (_) {}
   }
-  function handlePointerLeave() {
-    if (!isDrawing && !movingSelection && !draggingStamp) setHoverCell(null);
-  }
+  function handlePointerLeave() { if (!isDrawing && !movingSelection && !draggingStamp) setHoverCell(null); }
   
   /* --------------------------- gesture pinch to zoom --------------------------- */
   function getDistance(t1, t2) { return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
-  
-  function handleTouchStart(e) {
-    if (e.touches.length === 2) {
-      pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]);
-      pinchStartZoomRef.current = zoom;
-    }
-  }
-  
+  function handleTouchStart(e) { if (e.touches.length === 2) { pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]); pinchStartZoomRef.current = zoom; } }
   function handleTouchMove(e) {
     if (e.touches.length === 2 && pinchStartDistRef.current) {
-      e.preventDefault();
-      const dist = getDistance(e.touches[0], e.touches[1]);
-      const scale = dist / pinchStartDistRef.current;
-      const newZoom = Math.max(0.2, Math.min(5, pinchStartZoomRef.current * scale));
-      setZoom(newZoom);
+      e.preventDefault(); setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (getDistance(e.touches[0], e.touches[1]) / pinchStartDistRef.current))));
     }
   }
-
-  function handleTouchEnd(e) {
-    if (e.touches.length < 2) {
-      pinchStartDistRef.current = null;
-    }
-  }
-  
+  function handleTouchEnd(e) { if (e.touches.length < 2) pinchStartDistRef.current = null; }
   function handleWheel(e) {
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault();
-      const delta = e.deltaY < 0 ? 0.1 : -0.1;
-      setZoom((z) => Math.max(0.2, Math.min(5, z + delta)));
-    }
+    if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.max(0.2, Math.min(5, z + (e.deltaY < 0 ? 0.1 : -0.1)))); }
   }
-
   useEffect(() => {
     const stage = document.getElementById("canvas-stage");
-    if(stage) {
-       stage.addEventListener('wheel', handleWheel, {passive: false});
-       return () => stage.removeEventListener('wheel', handleWheel);
-    }
+    if(stage) { stage.addEventListener('wheel', handleWheel, {passive: false}); return () => stage.removeEventListener('wheel', handleWheel); }
   }, []);
-
-  /* --------------------------- keyboard shortcuts --------------------------- */
   useEffect(() => {
     function onKey(e) {
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
-      if (e.key === "Delete" || e.key === "Backspace") {
-        if (selection) deleteSelection();
-        else if (selectedStampId) deleteSelectedStamp();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
-        e.preventDefault();
-        if (e.shiftKey) redo();
-        else undo();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
-        e.preventDefault();
-        redo();
-      }
+      if (e.key === "Delete" || e.key === "Backspace") { if (selection) deleteSelection(); else if (selectedStampId) deleteSelectedStamp(); }
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); if (e.shiftKey) redo(); else undo(); }
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") { e.preventDefault(); redo(); }
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
   }, [selection, selectedStampId, project]);
 
-  /* --------------------------- grid size --------------------------- */
+  /* --------------------------- menu actions --------------------------- */
   function applyGridSize(newCols, newRows, label) {
     const next = deepClone(project);
     next.layers.forEach((layer) => {
       const newCells = {};
-      for (let ny = 0; ny < newRows; ny++)
-        for (let nx = 0; nx < newCols; nx++) {
-          const ox = Math.floor((nx * gridCols) / newCols);
-          const oy = Math.floor((ny * gridRows) / newRows);
-          const c = layer.cells[`${ox},${oy}`];
+      for (let ny = 0; ny < newRows; ny++) for (let nx = 0; nx < newCols; nx++) {
+          const c = layer.cells[`${Math.floor((nx * gridCols) / newCols)},${Math.floor((ny * gridRows) / newRows)}`];
           if (c) newCells[`${nx},${ny}`] = c;
         }
       layer.cells = newCells;
     });
-    commit(next);
-    setGridCols(newCols);
-    setGridRows(newRows);
-    setCustomW(newCols);
-    setCustomH(newRows);
-    setGridSizeLabel(label || `${newCols}×${newRows}`);
+    commit(next); setGridCols(newCols); setGridRows(newRows); setCustomW(newCols); setCustomH(newRows); setGridSizeLabel(label || `${newCols}×${newRows}`);
   }
-
-  /* --------------------------- layers --------------------------- */
-  function addLayer() {
-    const next = deepClone(project);
-    const n = next.layers.length + 1;
-    const layer = makeLayer(`Layer ${n}`);
-    next.layers.push(layer);
-    next.activeLayerId = layer.id;
-    commit(next);
-  }
-  function removeLayer(id) {
-    const next = deepClone(project);
-    if (next.layers.length <= 1) return;
-    next.layers = next.layers.filter((l) => l.id !== id);
-    if (next.activeLayerId === id) next.activeLayerId = next.layers[0].id;
-    commit(next);
-  }
-  function duplicateLayer(id) {
-    const next = deepClone(project);
-    const idx = next.layers.findIndex((l) => l.id === id);
-    const clone = deepClone(next.layers[idx]);
-    clone.id = uid();
-    clone.name = clone.name + " copy";
-    next.layers.splice(idx + 1, 0, clone);
-    commit(next);
-  }
-  function toggleVisible(id) {
-    const next = deepClone(project);
-    const l = next.layers.find((x) => x.id === id);
-    l.visible = !l.visible;
-    commit(next);
-  }
-  function toggleLock(id) {
-    const next = deepClone(project);
-    const l = next.layers.find((x) => x.id === id);
-    l.locked = !l.locked;
-    commit(next);
-  }
-  function renameLayer(id, name) {
-    const next = deepClone(project);
-    next.layers.find((l) => l.id === id).name = name;
-    commit(next);
-  }
-  function setOpacity(id, val) {
-    const next = deepClone(project);
-    next.layers.find((l) => l.id === id).opacity = val;
-    commit(next);
-  }
-  function moveLayer(id, dir) {
-    const next = deepClone(project);
-    const idx = next.layers.findIndex((l) => l.id === id);
-    const newIdx = idx + dir;
-    if (newIdx < 0 || newIdx >= next.layers.length) return;
-    const [item] = next.layers.splice(idx, 1);
-    next.layers.splice(newIdx, 0, item);
-    commit(next);
-  }
-  function mergeDown(id) {
-    const next = deepClone(project);
-    const idx = next.layers.findIndex((l) => l.id === id);
-    if (idx <= 0) return;
-    const below = next.layers[idx - 1];
-    const cur = next.layers[idx];
-    below.cells = { ...below.cells, ...cur.cells };
-    below.stamps = [...below.stamps, ...cur.stamps];
-    next.layers.splice(idx, 1);
-    if (next.activeLayerId === cur.id) next.activeLayerId = below.id;
-    commit(next);
-  }
+  function addLayer() { const next = deepClone(project), layer = makeLayer(`Layer ${next.layers.length + 1}`); next.layers.push(layer); next.activeLayerId = layer.id; commit(next); }
+  function removeLayer(id) { const next = deepClone(project); if (next.layers.length <= 1) return; next.layers = next.layers.filter((l) => l.id !== id); if (next.activeLayerId === id) next.activeLayerId = next.layers[0].id; commit(next); }
+  function duplicateLayer(id) { const next = deepClone(project), idx = next.layers.findIndex((l) => l.id === id), clone = deepClone(next.layers[idx]); clone.id = uid(); clone.name = clone.name + " copy"; next.layers.splice(idx + 1, 0, clone); commit(next); }
+  function toggleVisible(id) { const next = deepClone(project); next.layers.find((x) => x.id === id).visible = !next.layers.find((x) => x.id === id).visible; commit(next); }
+  function toggleLock(id) { const next = deepClone(project); next.layers.find((x) => x.id === id).locked = !next.layers.find((x) => x.id === id).locked; commit(next); }
+  function renameLayer(id, name) { const next = deepClone(project); next.layers.find((l) => l.id === id).name = name; commit(next); }
+  function setOpacity(id, val) { const next = deepClone(project); next.layers.find((l) => l.id === id).opacity = val; commit(next); }
+  function moveLayer(id, dir) { const next = deepClone(project), idx = next.layers.findIndex((l) => l.id === id), newIdx = idx + dir; if (newIdx < 0 || newIdx >= next.layers.length) return; const [item] = next.layers.splice(idx, 1); next.layers.splice(newIdx, 0, item); commit(next); }
+  function mergeDown(id) { const next = deepClone(project), idx = next.layers.findIndex((l) => l.id === id); if (idx <= 0) return; const below = next.layers[idx - 1], cur = next.layers[idx]; below.cells = { ...below.cells, ...cur.cells }; below.stamps = [...below.stamps, ...cur.stamps]; next.layers.splice(idx, 1); if (next.activeLayerId === cur.id) next.activeLayerId = below.id; commit(next); }
   function setActiveLayerId(id) { setProject((p) => ({ ...p, activeLayerId: id })); }
-
-  /* --------------------------- file management --------------------------- */
-  function newCanvas() {
-    if (!window.confirm("Buat kanvas baru? Semua perubahan akan hilang.")) return;
-    const layer = makeLayer("Layer 1");
-    const next = { layers: [layer], activeLayerId: layer.id };
-    commit(next);
-    setSelection(null);
-    setSelectedStampId(null);
-  }
-  function saveProject() {
-    const data = JSON.stringify({ version: 4, gridCols, gridRows, project, customCsvStamps, customImageStamps }, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "projek.saku";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  function newCanvas() { if (!window.confirm("Buat kanvas baru? Semua perubahan akan hilang.")) return; const layer = makeLayer("Layer 1"); commit({ layers: [layer], activeLayerId: layer.id }); setSelection(null); setSelectedStampId(null); }
+  function saveProject() { const blob = new Blob([JSON.stringify({ version: 4, gridCols, gridRows, project, customCsvStamps, customImageStamps }, null, 2)], { type: "application/json" }), url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = "projek.saku"; a.click(); URL.revokeObjectURL(url); }
   function handleOpenFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target.result);
-        setGridCols(data.gridCols);
-        setGridRows(data.gridRows);
-        setCustomW(data.gridCols);
-        setCustomH(data.gridRows);
-        setGridSizeLabel(`${data.gridCols}×${data.gridRows}`);
-        setProject(data.project);
-        setCustomCsvStamps(data.customCsvStamps || []);
-        setCustomImageStamps(data.customImageStamps || []);
-        pushHistory(data.project);
-        setSelection(null);
-        setSelectedStampId(null);
-      } catch (err) {
-        window.alert("File .saku tidak valid atau rusak.");
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
+        setGridCols(data.gridCols); setGridRows(data.gridRows); setCustomW(data.gridCols); setCustomH(data.gridRows); setGridSizeLabel(`${data.gridCols}×${data.gridRows}`);
+        setProject(data.project); setCustomCsvStamps(data.customCsvStamps || []); setCustomImageStamps(data.customImageStamps || []); pushHistory(data.project); setSelection(null); setSelectedStampId(null);
+      } catch (err) { window.alert("File .saku tidak valid atau rusak."); }
+    }; reader.readAsText(file); e.target.value = "";
   }
 
-  /* --------------------------- export --------------------------- */
   function renderToOffscreen(scale, withBg) {
-    const off = document.createElement("canvas");
-    off.width = gridCols * scale;
-    off.height = gridRows * scale;
-    const ctx = off.getContext("2d");
-    if (withBg) {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, off.width, off.height);
-    }
+    const off = document.createElement("canvas"); off.width = gridCols * scale; off.height = gridRows * scale; const ctx = off.getContext("2d");
+    if (withBg) { ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, off.width, off.height); }
     project.layers.forEach((layer) => {
-      if (!layer.visible) return;
-      ctx.globalAlpha = layer.opacity;
-      Object.entries(layer.cells).forEach(([key, color]) => {
-        const [x, y] = key.split(",").map(Number);
-        ctx.fillStyle = color;
-        ctx.fillRect(x * scale, y * scale, scale, scale);
-      });
+      if (!layer.visible) return; ctx.globalAlpha = layer.opacity;
+      Object.entries(layer.cells).forEach(([key, color]) => { const [x, y] = key.split(",").map(Number); ctx.fillStyle = color; ctx.fillRect(x * scale, y * scale, scale, scale); });
       layer.stamps.forEach((st) => drawStampOnCtx(ctx, st, scale, imageCacheRef));
-    });
-    ctx.globalAlpha = 1;
-    return off;
+    }); ctx.globalAlpha = 1; return off;
   }
-  function exportPNG() {
-    const off = renderToOffscreen(exportScale, false);
-    off.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "sahabatku.png";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  }
+  function exportPNG() { renderToOffscreen(exportScale, false).toBlob((blob) => { const url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = "sahabatku.png"; a.click(); URL.revokeObjectURL(url); }); }
   function exportSVG() {
-    const scale = 20;
-    let rects = "";
+    const scale = 20; let rects = "";
     project.layers.forEach((layer) => {
       if (!layer.visible) return;
-      Object.entries(layer.cells).forEach(([key, color]) => {
-        const [x, y] = key.split(",").map(Number);
-        rects += `<rect x="${x * scale}" y="${y * scale}" width="${scale}" height="${scale}" fill="${color}" opacity="${layer.opacity}"/>`;
-      });
+      Object.entries(layer.cells).forEach(([key, color]) => { const [x, y] = key.split(",").map(Number); rects += `<rect x="${x * scale}" y="${y * scale}" width="${scale}" height="${scale}" fill="${color}" opacity="${layer.opacity}"/>`; });
       layer.stamps.forEach((st) => {
-        const { w: effW, h: effH } = getEffectiveFootprint(st);
-        const cx = (st.gx + effW / 2) * scale, cy = (st.gy + effH / 2) * scale;
-        const boxW = st.footprintW * scale, boxH = st.footprintH * scale;
-        if (st.type === "image") {
-          rects += `<g transform="translate(${cx},${cy}) rotate(${st.rotation})" opacity="${layer.opacity}"><image href="${st.imageSrc}" x="${-boxW / 2}" y="${-boxH / 2}" width="${boxW}" height="${boxH}"/></g>`;
-        } else {
-          const subW = boxW / st.patternW, subH = boxH / st.patternH;
-          let inner = "";
-          st.cells.forEach(([px, py]) => {
-            inner += `<rect x="${-boxW / 2 + px * subW}" y="${-boxH / 2 + py * subH}" width="${subW}" height="${subH}" fill="${st.color}"/>`;
-          });
-          rects += `<g transform="translate(${cx},${cy}) rotate(${st.rotation})" opacity="${layer.opacity}">${inner}</g>`;
-        }
+        const { w: effW, h: effH } = getEffectiveFootprint(st), cx = (st.gx + effW / 2) * scale, cy = (st.gy + effH / 2) * scale, boxW = st.footprintW * scale, boxH = st.footprintH * scale;
+        if (st.type === "image") rects += `<g transform="translate(${cx},${cy}) rotate(${st.rotation})" opacity="${layer.opacity}"><image href="${st.imageSrc}" x="${-boxW / 2}" y="${-boxH / 2}" width="${boxW}" height="${boxH}"/></g>`;
+        else { let inner = ""; st.cells.forEach(([px, py]) => { inner += `<rect x="${-boxW / 2 + px * (boxW / st.patternW)}" y="${-boxH / 2 + py * (boxH / st.patternH)}" width="${boxW / st.patternW}" height="${boxH / st.patternH}" fill="${st.color}"/>`; }); rects += `<g transform="translate(${cx},${cy}) rotate(${st.rotation})" opacity="${layer.opacity}">${inner}</g>`; }
       });
     });
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${gridCols * scale}" height="${gridRows * scale}" viewBox="0 0 ${gridCols * scale} ${gridRows * scale}">${rects}</svg>`;
-    const blob = new Blob([svg], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sahabatku.svg";
-    a.click();
-    URL.revokeObjectURL(url);
+    const blob = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${gridCols * scale}" height="${gridRows * scale}" viewBox="0 0 ${gridCols * scale} ${gridRows * scale}">${rects}</svg>`], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = "sahabatku.svg"; a.click(); URL.revokeObjectURL(url);
   }
   function exportPDF() {
-    const off = renderToOffscreen(exportScale, true);
-    const dataUrl = off.toDataURL("image/png");
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "fixed";
-    iframe.style.right = "0";
-    iframe.style.bottom = "0";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "0";
-    document.body.appendChild(iframe);
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`<html><head><title>SahabatKu</title></head><body style="margin:0"><img src="${dataUrl}" style="width:100%" /></body></html>`);
-    doc.close();
-    iframe.onload = () => {
-      iframe.contentWindow.focus();
-      iframe.contentWindow.print();
-      setTimeout(() => document.body.removeChild(iframe), 1000);
-    };
+    const dataUrl = renderToOffscreen(exportScale, true).toDataURL("image/png"), iframe = document.createElement("iframe");
+    iframe.style.position = "fixed"; iframe.style.right = "0"; iframe.style.bottom = "0"; iframe.style.width = "0"; iframe.style.height = "0"; iframe.style.border = "0";
+    document.body.appendChild(iframe); const doc = iframe.contentWindow.document; doc.open(); doc.write(`<html><head><title>SahabatKu</title></head><body style="margin:0"><img src="${dataUrl}" style="width:100%" /></body></html>`); doc.close();
+    iframe.onload = () => { iframe.contentWindow.focus(); iframe.contentWindow.print(); setTimeout(() => document.body.removeChild(iframe), 1000); };
   }
   function zoomStep(dir) {
     const idx = ZOOM_STEPS.indexOf(zoom);
-    const newIdx = Math.max(0, Math.min(ZOOM_STEPS.length - 1, (idx === -1 ? 2 : idx) + dir));
+    const newIdx = Math.max(0, Math.min(ZOOM_STEPS.length - 1, (idx === -1 ? 4 : idx) + dir));
     setZoom(ZOOM_STEPS[newIdx]);
   }
 
@@ -1154,14 +771,16 @@ export default function SahabatKuApp() {
         @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Inter:wght@400;500;600;700&display=swap');
         input[type=range]{ accent-color: ${C.gold}; }
         input[type=color]{ border:none; padding:0; background:none; }
-        ::-webkit-scrollbar{ width:8px; height:8px; }
+        ::-webkit-scrollbar{ width:4px; height:4px; }
         ::-webkit-scrollbar-thumb{ background:${C.line}; border-radius:4px; }
         canvas{ -webkit-user-drag:none; user-select:none; -webkit-touch-callout:none; touch-action:none; }
       `}</style>
 
       {/* ---------- top bar ---------- */}
-      <div className="flex items-center gap-2 px-4 h-14 shrink-0 border-b overflow-x-auto overflow-y-hidden" style={{ background: C.panel, borderColor: C.line }}>
-        <div className="flex items-center gap-2 mr-2">
+      <div className="flex items-center px-4 h-14 shrink-0 border-b relative" style={{ background: C.panel, borderColor: C.line }}>
+        
+        {/* LOGO DIKUNCI DI KIRI AGAR TIDAK HILANG */}
+        <div className="flex items-center gap-2 mr-3 shrink-0 z-10 sticky left-0" style={{ background: C.panel }}>
           <img 
             src={customLogo} 
             alt="SahabatKu Logo" 
@@ -1169,59 +788,61 @@ export default function SahabatKuApp() {
             className="shrink-0"
           />
         </div>
-        <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
-        <IconBtn title="Baru" onClick={newCanvas}><FilePlus2 size={17} /></IconBtn>
-        <IconBtn title="Simpan (.saku)" onClick={saveProject}><Save size={17} /></IconBtn>
-        <IconBtn title="Buka file .saku" onClick={() => fileInputRef.current.click()}><FolderOpen size={17} /></IconBtn>
-        <input ref={fileInputRef} type="file" accept=".saku,.json" className="hidden" onChange={handleOpenFile} />
         
-        <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
-        <IconBtn title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}><Undo2 size={17} /></IconBtn>
-        <IconBtn title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={redo}><Redo2 size={17} /></IconBtn>
-        
-        <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
-        <div className="flex items-center shrink-0">
-            <IconBtn title="Perkecil" onClick={() => zoomStep(-1)}><ZoomOut size={17} /></IconBtn>
-            <span className="text-xs w-10 text-center" style={{ color: C.muted }}>{Math.round(zoom * 100)}%</span>
-            <IconBtn title="Perbesar" onClick={() => zoomStep(1)}><ZoomIn size={17} /></IconBtn>
-        </div>
-        
-        <div className="flex-1 shrink-0 min-w-4" />
-        
-        {/* Export Dropdown & Buttons (now always visible on all devices) */}
-        <div className="flex items-center gap-1 shrink-0">
-            <select 
-               title="Skala Export (px per kotak)" 
-               value={exportScale} 
-               onChange={(e) => setExportScale(Number(e.target.value))} 
-               className="text-[11px] px-1.5 py-1 rounded cursor-pointer mr-1" 
-               style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}
-            >
-               <option value="1">Skala 1x</option>
-               <option value="4">Skala 4x</option>
-               <option value="8">Skala 8x</option>
-               <option value="16">Skala 16x</option>
-               <option value="20">Skala 20x</option>
-            </select>
-            <IconBtn title="Export PNG" onClick={exportPNG}><ImageIcon size={17} /></IconBtn>
-            <IconBtn title="Export SVG" onClick={exportSVG}><FileText size={17} /></IconBtn>
-            <IconBtn title="Export PDF (cetak browser)" onClick={exportPDF}><Printer size={17} /></IconBtn>
+        {/* SISA MENU BISA DI-SCROLL KE KANAN JIKA LAYAR SEMPIT */}
+        <div className="flex items-center gap-1.5 overflow-x-auto overflow-y-hidden flex-1 pb-1">
+          <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
+          <IconBtn title="Baru" onClick={newCanvas}><FilePlus2 size={16} /></IconBtn>
+          <IconBtn title="Simpan (.saku)" onClick={saveProject}><Save size={16} /></IconBtn>
+          <IconBtn title="Buka file .saku" onClick={() => fileInputRef.current.click()}><FolderOpen size={16} /></IconBtn>
+          <input ref={fileInputRef} type="file" accept=".saku,.json" className="hidden" onChange={handleOpenFile} />
+          
+          <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
+          <IconBtn title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}><Undo2 size={16} /></IconBtn>
+          <IconBtn title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={redo}><Redo2 size={16} /></IconBtn>
+          
+          <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
+          <div className="flex items-center shrink-0">
+              <IconBtn title="Perkecil" onClick={() => zoomStep(-1)}><ZoomOut size={16} /></IconBtn>
+              <span className="text-[11px] w-8 text-center" style={{ color: C.muted }}>{Math.round(zoom * 100)}%</span>
+              <IconBtn title="Perbesar" onClick={() => zoomStep(1)}><ZoomIn size={16} /></IconBtn>
+          </div>
+          
+          <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
+          
+          <div className="flex items-center gap-1 shrink-0">
+              <select 
+                 title="Skala Export" 
+                 value={exportScale} 
+                 onChange={(e) => setExportScale(Number(e.target.value))} 
+                 className="text-[10px] px-1 py-1 rounded cursor-pointer mr-1" 
+                 style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}
+              >
+                 <option value="1">1x</option>
+                 <option value="4">4x</option>
+                 <option value="8">8x</option>
+                 <option value="16">16x</option>
+              </select>
+              <IconBtn title="Export PNG" onClick={exportPNG}><ImageIcon size={16} /></IconBtn>
+              <IconBtn title="Export SVG" onClick={exportSVG}><FileText size={16} /></IconBtn>
+              <IconBtn title="Export PDF" onClick={exportPDF}><Printer size={16} /></IconBtn>
+          </div>
         </div>
       </div>
 
       {/* ---------- main area ---------- */}
-      <div className="flex flex-1 min-h-0 relative">
+      <div className="flex flex-1 min-h-0 relative overflow-hidden">
         
         {/* left toolbar */}
-        <div className="w-14 shrink-0 border-r flex flex-col items-center py-3 gap-1 z-20" style={{ background: C.panel, borderColor: C.line }}>
-          <ToolBtn active={activeTool === "pencil"} title="Pensil (klik & seret)" onClick={() => setActiveTool("pencil")}><Pencil size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "eraser"} title="Penghapus (klik & seret — juga menghapus stempel)" onClick={() => setActiveTool("eraser")}><Eraser size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "select"} title="Pilih / Select" onClick={() => setActiveTool("select")}><MousePointer2 size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "bucket"} title="Paint Bucket" onClick={() => setActiveTool("bucket")}><PaintBucket size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "line"} title="Line (klik & seret)" onClick={() => setActiveTool("line")}><Slash size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "rect"} title="Rectangle (klik & seret)" onClick={() => setActiveTool("rect")}><Square size={18} /></ToolBtn>
-          <div className="w-8 h-px my-1" style={{ background: C.line }} />
-          <ToolBtn title="Rotasi objek terpilih 90°" disabled={!hasActiveObject} onClick={rotateActive}><RotateCw size={18} /></ToolBtn>
+        <div className="w-12 md:w-14 shrink-0 border-r flex flex-col items-center py-2 md:py-3 gap-1 z-20" style={{ background: C.panel, borderColor: C.line }}>
+          <ToolBtn active={activeTool === "pencil"} title="Pensil" onClick={() => setActiveTool("pencil")}><Pencil size={18} /></ToolBtn>
+          <ToolBtn active={activeTool === "eraser"} title="Penghapus" onClick={() => setActiveTool("eraser")}><Eraser size={18} /></ToolBtn>
+          <ToolBtn active={activeTool === "select"} title="Pilih" onClick={() => setActiveTool("select")}><MousePointer2 size={18} /></ToolBtn>
+          <ToolBtn active={activeTool === "bucket"} title="Bucket" onClick={() => setActiveTool("bucket")}><PaintBucket size={18} /></ToolBtn>
+          <ToolBtn active={activeTool === "line"} title="Garis" onClick={() => setActiveTool("line")}><Slash size={18} /></ToolBtn>
+          <ToolBtn active={activeTool === "rect"} title="Kotak" onClick={() => setActiveTool("rect")}><Square size={18} /></ToolBtn>
+          <div className="w-6 md:w-8 h-px my-1" style={{ background: C.line }} />
+          <ToolBtn title="Rotasi" disabled={!hasActiveObject} onClick={rotateActive}><RotateCw size={18} /></ToolBtn>
           <ToolBtn active={activeTool === "stamp"} title="Stempel" onClick={() => setActiveTool("stamp")}><Stamp size={18} /></ToolBtn>
         </div>
 
@@ -1229,17 +850,17 @@ export default function SahabatKuApp() {
         <div id="canvas-stage" className="flex-1 min-w-0 flex flex-col items-center justify-center relative overflow-hidden" style={{ background: "#12151A" }}>
           {hasActiveObject ? (
             <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-              <span className="text-xs" style={{ color: C.muted }}>{selection ? "Seleksi aktif" : "Stempel terpilih"}</span>
-              <button className="flex items-center gap-1 text-xs px-2 py-1 rounded" style={{ background: C.goldSoft, color: C.gold }} onClick={rotateActive}><RotateCw size={13} /> Rotasi 90°</button>
-              <button className="flex items-center gap-1 text-xs px-2 py-1 rounded" style={{ background: "rgba(209,73,91,0.15)", color: C.danger }} onClick={deleteActive}><Trash2 size={13} /> Hapus</button>
+              <span className="text-[10px] md:text-xs" style={{ color: C.muted }}>{selection ? "Seleksi aktif" : "Stempel terpilih"}</span>
+              <button className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: C.goldSoft, color: C.gold }} onClick={rotateActive}><RotateCw size={13} /> Rotasi</button>
+              <button className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: "rgba(209,73,91,0.15)", color: C.danger }} onClick={deleteActive}><Trash2 size={13} /> Hapus</button>
               <button className="p-1 rounded" style={{ color: C.muted }} onClick={() => { setSelection(null); setSelectedStampId(null); }}><X size={14} /></button>
             </div>
           ) : activeTool === "rect" ? (
             <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-              <span className="text-xs" style={{ color: C.muted }}>Kotak</span>
+              <span className="text-[10px] md:text-xs" style={{ color: C.muted }}>Kotak</span>
               <button
                 onClick={() => setRectFilled((f) => !f)}
-                className="flex items-center gap-1 text-xs px-2 py-1 rounded"
+                className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded"
                 style={{ background: rectFilled ? C.goldSoft : "transparent", color: rectFilled ? C.gold : C.text, border: `1px solid ${C.line}` }}
               >
                 <Square size={13} /> {rectFilled ? "Terisi" : "Garis Tepi"}
@@ -1247,204 +868,172 @@ export default function SahabatKuApp() {
             </div>
           ) : null}
           <div 
-             className="max-w-full max-h-full overflow-auto p-6 touch-none" 
-             onTouchStart={handleTouchStart}
-             onTouchMove={handleTouchMove}
-             onTouchEnd={handleTouchEnd}
+             className="max-w-full max-h-full overflow-auto p-4 md:p-6 touch-none" 
+             onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
           >
             <canvas
-              ref={canvasRef}
-              draggable={false}
-              onDragStart={(e) => e.preventDefault()}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              onPointerLeave={handlePointerLeave}
+              ref={canvasRef} draggable={false} onDragStart={(e) => e.preventDefault()}
+              onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp} onPointerLeave={handlePointerLeave}
               style={{ cursor: activeTool === "select" ? "default" : "crosshair", boxShadow: "0 8px 30px rgba(0,0,0,0.5)", imageRendering: "pixelated" }}
             />
           </div>
-          <p className="text-xs pb-3 hidden md:block" style={{ color: C.muted }}>
-            Klik lalu seret untuk pensil/penghapus/line/rectangle. Untuk stempel, arahkan kursor untuk melihat pratinjau transparan sebelum klik. Scroll atau pinch untuk zoom.
-          </p>
         </div>
 
-        {/* Right Sidebar Area */}
-        <div className="flex shrink-0 border-l relative h-full bg-[#3A2266] z-20" style={{ borderColor: C.line }}>
+        {/* Right Sidebar Area - DIBUAT ABSOLUTE DI HP AGAR TIDAK MENGGENCET KANVAS */}
+        <div className={`absolute top-0 right-0 h-full bg-[#3A2266] z-30 transition-transform duration-300 flex border-l md:relative shadow-2xl md:shadow-none`} 
+             style={{ borderColor: C.line, transform: sidebarExpanded ? 'translateX(0)' : 'translateX(100%)' }}>
           
-          {/* Collapse/Expand Toggle Button - Now attached cleanly to the edge */}
+          {/* Toggle Panel Button - Selalu nempel di kiri Sidebar (bergeser ikut sidebar) */}
           <div 
              onClick={toggleSidebar}
-             className="absolute -left-6 top-1/2 -translate-y-1/2 w-6 h-12 flex items-center justify-center cursor-pointer shadow-md rounded-l-md" 
-             style={{ background: C.goldSoft, border: `1px solid ${C.line}`, borderRight: "none", zIndex: 30 }}
+             className="absolute top-1/2 -left-6 md:-left-5 -translate-y-1/2 w-6 md:w-5 h-16 md:h-12 flex items-center justify-center cursor-pointer rounded-l-md shadow-[0_0_10px_rgba(0,0,0,0.5)] md:shadow-md bg-[#462C7D]" 
+             style={{ border: `1px solid ${C.line}`, borderRight: "none" }}
              title={sidebarExpanded ? "Tutup Panel" : "Buka Panel"}
           >
-            {sidebarExpanded ? <ChevronRight size={16} color={C.gold} /> : <ChevronLeft size={16} color={C.gold} />}
+            {sidebarExpanded ? <ChevronRight size={18} color={C.gold} /> : <ChevronLeft size={18} color={C.gold} />}
           </div>
 
-          {/* Collapsed State: Icon Bar Only */}
+          {/* Bar Icon Vertikal (Hanya muncul jika panel tertutup, KHUSUS LAYAR LEBAR) */}
           {!sidebarExpanded && (
-            <div className="w-12 h-full flex flex-col items-center py-4 gap-3 bg-[#3A2266]">
-              <PanelToggle title="Buka Panel Grid" active={panels.grid.open} onClick={() => openPanel("grid")}><Grid3x3 size={18} /></PanelToggle>
-              <PanelToggle title="Buka Panel Warna" active={panels.color.open} onClick={() => openPanel("color")}><Palette size={18} /></PanelToggle>
-              <PanelToggle title="Buka Panel Stempel" active={panels.stamp.open} onClick={() => openPanel("stamp")}><Stamp size={18} /></PanelToggle>
-              <PanelToggle title="Buka Panel Layer" active={panels.layer.open} onClick={() => openPanel("layer")}><LayersIcon size={18} /></PanelToggle>
+            <div className="w-12 h-full hidden md:flex flex-col items-center py-4 gap-3 bg-[#3A2266] absolute right-[100%] border-l" style={{ borderColor: C.line }}>
+              <PanelToggle title="Buka Panel Grid" onClick={() => openPanel("grid")}><Grid3x3 size={18} /></PanelToggle>
+              <PanelToggle title="Buka Panel Warna" onClick={() => openPanel("color")}><Palette size={18} /></PanelToggle>
+              <PanelToggle title="Buka Panel Stempel" onClick={() => openPanel("stamp")}><Stamp size={18} /></PanelToggle>
+              <PanelToggle title="Buka Panel Layer" onClick={() => openPanel("layer")}><LayersIcon size={18} /></PanelToggle>
             </div>
           )}
 
           {/* Expanded State: Full Panels */}
-          {sidebarExpanded && (
-            <div className="w-72 h-full flex flex-col bg-[#3A2266]">
-              <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: C.line }}>
-                <span className="text-sm font-semibold text-[#F6EEFA]">Panel Kontrol</span>
-              </div>
-              
-              {/* Scrollable Panels Area */}
-              <div className="flex-1 overflow-y-auto">
-                <Panel title="Kanvas & Grid" icon={<Grid3x3 size={14} />} open={panels.grid.open} collapsed={panels.grid.collapsed} onToggleCollapse={() => togglePanelCollapsed("grid")} onClose={() => closePanel("grid")}>
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    {GRID_PRESETS.map((p) => (
-                      <button key={p.label} onClick={() => applyGridSize(p.cols, p.rows, p.label)} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === p.label ? C.gold : C.line, color: gridSizeLabel === p.label ? C.gold : C.text }}>{p.label}</button>
-                    ))}
-                    <button onClick={() => setGridSizeLabel("custom")} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === "custom" ? C.gold : C.line, color: gridSizeLabel === "custom" ? C.gold : C.text }}>Custom</button>
-                  </div>
-                  {gridSizeLabel === "custom" && (
-                    <div className="flex items-center gap-2 mb-3">
-                      <input type="number" min={4} max={128} value={customW} onChange={(e) => setCustomW(Number(e.target.value))} className="w-14 text-xs px-1.5 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                      <span className="text-xs" style={{ color: C.muted }}>×</span>
-                      <input type="number" min={4} max={128} value={customH} onChange={(e) => setCustomH(Number(e.target.value))} className="w-14 text-xs px-1.5 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                      <button onClick={() => applyGridSize(customW, customH, "custom")} className="text-xs px-2 py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Terapkan</button>
-                    </div>
-                  )}
-                  <ToggleRow label="Tampilkan Grid" checked={showGrid} onChange={setShowGrid} />
-                  <ToggleRow label="Grid Alternatif (kotak selang-seling)" checked={showAltShading} onChange={setShowAltShading} />
-                  <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: C.muted }}>Ubah ukuran grid menskalakan ulang gambar bebas. Stempel tidak berubah.</p>
-                </Panel>
-
-                <Panel title="Warna" icon={<Palette size={14} />} open={panels.color.open} collapsed={panels.color.collapsed} onToggleCollapse={() => togglePanelCollapsed("color")} onClose={() => closePanel("color")}>
+          <div className="w-64 md:w-72 h-full flex flex-col bg-[#3A2266]">
+            <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: C.line }}>
+              <span className="text-sm font-semibold text-[#F6EEFA]">Panel Kontrol</span>
+            </div>
+            
+            {/* Scrollable Panels Area */}
+            <div className="flex-1 overflow-y-auto">
+              <Panel title="Kanvas & Grid" icon={<Grid3x3 size={14} />} open={panels.grid.open} collapsed={panels.grid.collapsed} onToggleCollapse={() => togglePanelCollapsed("grid")} onClose={() => closePanel("grid")}>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {GRID_PRESETS.map((p) => (
+                    <button key={p.label} onClick={() => applyGridSize(p.cols, p.rows, p.label)} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === p.label ? C.gold : C.line, color: gridSizeLabel === p.label ? C.gold : C.text }}>{p.label}</button>
+                  ))}
+                  <button onClick={() => setGridSizeLabel("custom")} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === "custom" ? C.gold : C.line, color: gridSizeLabel === "custom" ? C.gold : C.text }}>Custom</button>
+                </div>
+                {gridSizeLabel === "custom" && (
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-9 h-9 rounded border-2" style={{ background: activeColor, borderColor: C.line }} />
-                    <input type="color" value={pickerColor} onChange={(e) => { setPickerColor(e.target.value); pickColor(e.target.value); }} className="w-9 h-9 rounded cursor-pointer" />
-                    <button title="Simpan ke palet custom" onClick={() => setCustomPalette((prev) => (prev.includes(pickerColor) ? prev : [...prev, pickerColor].slice(-16)))} className="text-xs px-2 py-1.5 rounded flex items-center gap-1" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><Plus size={12} /> Palet</button>
+                    <input type="number" min={4} max={128} value={customW} onChange={(e) => setCustomW(Number(e.target.value))} className="w-12 text-xs px-1 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
+                    <span className="text-xs" style={{ color: C.muted }}>×</span>
+                    <input type="number" min={4} max={128} value={customH} onChange={(e) => setCustomH(Number(e.target.value))} className="w-12 text-xs px-1 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
+                    <button onClick={() => applyGridSize(customW, customH, "custom")} className="text-[10px] px-2 py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Set</button>
                   </div>
-                  <select value={activePaletteName} onChange={(e) => setActivePaletteName(e.target.value)} className="w-full text-xs px-2 py-1.5 rounded mb-2" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}>
-                    {Object.keys(PALETTES).map((name) => (<option key={name} value={name}>{name}</option>))}
-                  </select>
-                  <div className="flex flex-wrap gap-1.5 mb-3">{PALETTES[activePaletteName].map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div>
-                  {customPalette.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>Palet Custom</p><div className="flex flex-wrap gap-1.5 mb-3">{customPalette.map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
-                  {recentColors.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>Terakhir Dipakai</p><div className="flex flex-wrap gap-1.5">{recentColors.map((c, i) => (<Swatch key={c + i} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
-                </Panel>
+                )}
+                <ToggleRow label="Tampilkan Grid" checked={showGrid} onChange={setShowGrid} />
+                <ToggleRow label="Grid Alternatif" checked={showAltShading} onChange={setShowAltShading} />
+              </Panel>
 
-                <Panel title="Stempel" icon={<Stamp size={14} />} open={panels.stamp.open} collapsed={panels.stamp.collapsed} onToggleCollapse={() => togglePanelCollapsed("stamp")} onClose={() => closePanel("stamp")}>
-                  <p className="text-xs mb-1.5" style={{ color: C.muted }}>Bentuk Bawaan</p>
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    {BUILTIN_STAMPS.map((s) => (
-                      <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1.5 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+              <Panel title="Warna" icon={<Palette size={14} />} open={panels.color.open} collapsed={panels.color.collapsed} onToggleCollapse={() => togglePanelCollapsed("color")} onClose={() => closePanel("color")}>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded border-2" style={{ background: activeColor, borderColor: C.line }} />
+                  <input type="color" value={pickerColor} onChange={(e) => { setPickerColor(e.target.value); pickColor(e.target.value); }} className="w-8 h-8 rounded cursor-pointer" />
+                  <button onClick={() => setCustomPalette((prev) => (prev.includes(pickerColor) ? prev : [...prev, pickerColor].slice(-16)))} className="text-[10px] px-2 py-1 rounded flex items-center gap-1" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><Plus size={12} /> Palet</button>
+                </div>
+                <select value={activePaletteName} onChange={(e) => setActivePaletteName(e.target.value)} className="w-full text-[11px] md:text-xs px-2 py-1.5 rounded mb-2" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}>
+                  {Object.keys(PALETTES).map((name) => (<option key={name} value={name}>{name}</option>))}
+                </select>
+                <div className="flex flex-wrap gap-1.5 mb-3">{PALETTES[activePaletteName].map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div>
+                {customPalette.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>Custom</p><div className="flex flex-wrap gap-1.5 mb-3">{customPalette.map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
+                {recentColors.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>History</p><div className="flex flex-wrap gap-1.5">{recentColors.map((c, i) => (<Swatch key={c + i} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
+              </Panel>
+
+              <Panel title="Stempel" icon={<Stamp size={14} />} open={panels.stamp.open} collapsed={panels.stamp.collapsed} onToggleCollapse={() => togglePanelCollapsed("stamp")} onClose={() => closePanel("stamp")}>
+                <p className="text-[10px] mb-1" style={{ color: C.muted }}>Bentuk Bawaan</p>
+                <div className="grid grid-cols-4 md:grid-cols-3 gap-1.5 mb-3">
+                  {BUILTIN_STAMPS.map((s) => (
+                    <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+                      <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[10px]" style={{ color: C.muted }}>CSV & Gambar</p>
+                  <button onClick={() => setShowCsvForm((s) => !s)} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>{showCsvForm ? "Tutup" : "+ CSV"}</button>
+                </div>
+                {customCsvStamps.length > 0 && (
+                  <div className="grid grid-cols-4 gap-1.5 mb-2">
+                    {customCsvStamps.map((s) => (
+                      <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
                         <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
                       </button>
                     ))}
                   </div>
-
-                  <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-xs" style={{ color: C.muted }}>Stempel dari CSV</p>
-                    <button onClick={() => setShowCsvForm((s) => !s)} className="text-xs px-1.5 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>{showCsvForm ? "Tutup" : "+ Baru"}</button>
-                  </div>
-                  {customCsvStamps.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2 mb-2">
-                      {customCsvStamps.map((s) => (
-                        <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1.5 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
-                          <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {showCsvForm && (
-                    <div className="mb-3 p-2 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-                      <input value={csvName} onChange={(e) => setCsvName(e.target.value)} placeholder="Nama stempel (mis. Alif)" className="w-full text-xs px-2 py-1.5 rounded mb-1.5" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
-                      <textarea
-                        value={csvText}
-                        onChange={(e) => setCsvText(e.target.value)}
-                        placeholder={"000;010;000"}
-                        rows={3}
-                        className="w-full text-[10px] font-mono px-2 py-1.5 rounded mb-1.5 leading-relaxed"
-                        style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }}
-                      />
-                      <button onClick={handleAddCsvStamp} className="w-full text-xs py-1.5 rounded" style={{ background: C.gold, color: C.chrome }}>Tambah Stempel</button>
-                    </div>
-                  )}
-
-                  <p className="text-xs mb-1.5" style={{ color: C.muted }}>Stempel Custom (gambar)</p>
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    {customImageStamps.map((cs) => (
-                      <button key={cs.id} title={cs.label} onClick={() => { setStampChoiceId(cs.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center overflow-hidden" style={{ borderColor: stampChoiceId === cs.id ? C.gold : C.line, background: C.panelAlt }}>
-                        <img src={cs.dataUrl} alt={cs.label} className="w-full h-full object-contain" />
-                      </button>
-                    ))}
-                    <button onClick={() => stampUploadRef.current.click()} className="aspect-square rounded border border-dashed flex items-center justify-center" style={{ borderColor: C.line, color: C.muted }} title="Unggah gambar stempel">
-                      <Upload size={16} />
-                    </button>
-                    <input ref={stampUploadRef} type="file" accept="image/*" className="hidden" onChange={handleUploadStamp} />
-                  </div>
-                  <div className="mb-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs" style={{ color: C.muted }}>Ukuran di Kanvas</span>
-                      {chosenStamp.kind === "cells" && (
-                        <button
-                          onClick={() => { setNextFootprintW(chosenStamp.w); setNextFootprintH(chosenStamp.h); }}
-                          className="text-[10px] px-1.5 py-0.5 rounded"
-                          style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}
-                        >
-                          Asli ({chosenStamp.w}×{chosenStamp.h})
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <input type="number" min={1} max={MAX_STAMP} value={nextFootprintW} onChange={(e) => setNextFootprintW(Math.max(1, Math.min(MAX_STAMP, Number(e.target.value) || 1)))} className="w-14 text-xs px-1.5 py-1 rounded text-center" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                      <span className="text-xs" style={{ color: C.muted }}>×</span>
-                      <input type="number" min={1} max={MAX_STAMP} value={nextFootprintH} onChange={(e) => setNextFootprintH(Math.max(1, Math.min(MAX_STAMP, Number(e.target.value) || 1)))} className="w-14 text-xs px-1.5 py-1 rounded text-center" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                      <span className="text-xs" style={{ color: C.muted }}>sel</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs" style={{ color: C.muted }}>Rotasi stempel</span>
-                    <button onClick={() => setNextStampRotation((r) => (r + 90) % 360)} className="flex items-center gap-1 text-xs px-2 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><RotateCw size={12} /> {nextStampRotation}°</button>
-                  </div>
-                </Panel>
-
-                <Panel title="Layer" icon={<LayersIcon size={14} />} open={panels.layer.open} collapsed={panels.layer.collapsed} onToggleCollapse={() => togglePanelCollapsed("layer")} onClose={() => closePanel("layer")} noBorder>
-                  <button onClick={addLayer} className="w-full text-xs py-1.5 rounded mb-2 flex items-center justify-center gap-1" style={{ background: C.gold, color: C.chrome }}><Plus size={13} /> Tambah Layer</button>
-                  <div className="flex flex-col gap-1.5">
-                    {displayLayers.map((layer) => (
-                      <LayerRow
-                        key={layer.id}
-                        layer={layer}
-                        active={layer.id === project.activeLayerId}
-                        onSelect={() => setActiveLayerId(layer.id)}
-                        onToggleVisible={() => toggleVisible(layer.id)}
-                        onToggleLock={() => toggleLock(layer.id)}
-                        onRename={(name) => renameLayer(layer.id, name)}
-                        onDuplicate={() => duplicateLayer(layer.id)}
-                        onDelete={() => removeLayer(layer.id)}
-                        onOpacity={(v) => setOpacity(layer.id, v)}
-                        onMoveUp={() => moveLayer(layer.id, 1)}
-                        onMoveDown={() => moveLayer(layer.id, -1)}
-                        onMerge={() => mergeDown(layer.id)}
-                        canDelete={project.layers.length > 1}
-                      />
-                    ))}
-                  </div>
-                </Panel>
-
-                {(!panels.grid.open && !panels.color.open && !panels.stamp.open && !panels.layer.open) && (
-                   <div className="px-4 py-8 text-center">
-                     <p className="text-[11px] text-[#C6AEE0]">Semua panel ditutup.</p>
-                     <p className="text-[11px] text-[#C6AEE0] mt-1">Buka dari ikon di bar sebelah kiri.</p>
-                   </div>
                 )}
-              </div>
+                {showCsvForm && (
+                  <div className="mb-2 p-1.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
+                    <input value={csvName} onChange={(e) => setCsvName(e.target.value)} placeholder="Nama (mis. Alif)" className="w-full text-[10px] px-1.5 py-1 rounded mb-1" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
+                    <textarea value={csvText} onChange={(e) => setCsvText(e.target.value)} placeholder={"000;010;000"} rows={2} className="w-full text-[10px] font-mono px-1.5 py-1 rounded mb-1" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
+                    <button onClick={handleAddCsvStamp} className="w-full text-[10px] py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Tambah CSV</button>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-4 gap-1.5 mb-2">
+                  {customImageStamps.map((cs) => (
+                    <button key={cs.id} title={cs.label} onClick={() => { setStampChoiceId(cs.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center overflow-hidden" style={{ borderColor: stampChoiceId === cs.id ? C.gold : C.line, background: C.panelAlt }}>
+                      <img src={cs.dataUrl} alt={cs.label} className="w-full h-full object-contain" />
+                    </button>
+                  ))}
+                  <button onClick={() => stampUploadRef.current.click()} className="aspect-square rounded border border-dashed flex items-center justify-center" style={{ borderColor: C.line, color: C.muted }} title="Unggah Gambar">
+                    <Upload size={14} />
+                  </button>
+                  <input ref={stampUploadRef} type="file" accept="image/*" className="hidden" onChange={handleUploadStamp} />
+                </div>
+                
+                <div className="mb-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px]" style={{ color: C.muted }}>Ukuran (Sel)</span>
+                    {chosenStamp.kind === "cells" && (
+                      <button onClick={() => { setNextFootprintW(chosenStamp.w); setNextFootprintH(chosenStamp.h); }} className="text-[9px] px-1 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>Asli ({chosenStamp.w}×{chosenStamp.h})</button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <input type="number" min={1} max={MAX_STAMP} value={nextFootprintW} onChange={(e) => setNextFootprintW(Math.max(1, Math.min(MAX_STAMP, Number(e.target.value) || 1)))} className="w-12 text-[11px] px-1 py-1 rounded text-center" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
+                    <span className="text-xs" style={{ color: C.muted }}>×</span>
+                    <input type="number" min={1} max={MAX_STAMP} value={nextFootprintH} onChange={(e) => setNextFootprintH(Math.max(1, Math.min(MAX_STAMP, Number(e.target.value) || 1)))} className="w-12 text-[11px] px-1 py-1 rounded text-center" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: C.muted }}>Rotasi</span>
+                  <button onClick={() => setNextStampRotation((r) => (r + 90) % 360)} className="flex items-center gap-1 text-[11px] px-2 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><RotateCw size={10} /> {nextStampRotation}°</button>
+                </div>
+              </Panel>
+
+              <Panel title="Layer" icon={<LayersIcon size={14} />} open={panels.layer.open} collapsed={panels.layer.collapsed} onToggleCollapse={() => togglePanelCollapsed("layer")} onClose={() => closePanel("layer")} noBorder>
+                <button onClick={addLayer} className="w-full text-xs py-1.5 rounded mb-2 flex items-center justify-center gap-1" style={{ background: C.gold, color: C.chrome }}><Plus size={13} /> Tambah Layer</button>
+                <div className="flex flex-col gap-1.5">
+                  {displayLayers.map((layer) => (
+                    <LayerRow
+                      key={layer.id} layer={layer} active={layer.id === project.activeLayerId}
+                      onSelect={() => setActiveLayerId(layer.id)} onToggleVisible={() => toggleVisible(layer.id)}
+                      onToggleLock={() => toggleLock(layer.id)} onRename={(name) => renameLayer(layer.id, name)}
+                      onDuplicate={() => duplicateLayer(layer.id)} onDelete={() => removeLayer(layer.id)}
+                      onOpacity={(v) => setOpacity(layer.id, v)} onMoveUp={() => moveLayer(layer.id, 1)}
+                      onMoveDown={() => moveLayer(layer.id, -1)} onMerge={() => mergeDown(layer.id)}
+                      canDelete={project.layers.length > 1}
+                    />
+                  ))}
+                </div>
+              </Panel>
+
+              {(!panels.grid.open && !panels.color.open && !panels.stamp.open && !panels.layer.open) && (
+                 <div className="px-4 py-8 text-center">
+                   <p className="text-[10px] text-[#C6AEE0]">Semua panel ditutup.</p>
+                   <p className="text-[10px] text-[#C6AEE0] mt-1 hidden md:block">Buka dari ikon di bar sebelah kiri.</p>
+                   <button onClick={() => { openPanel("grid"); openPanel("color"); openPanel("stamp"); openPanel("layer"); }} className="mt-3 text-[10px] border px-2 py-1 rounded" style={{ borderColor: C.line, color: C.text }}>Tampilkan Semua</button>
+                 </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
@@ -1454,22 +1043,22 @@ export default function SahabatKuApp() {
 /* ------------------------------ small components ------------------------------ */
 function IconBtn({ children, title, onClick, disabled }) {
   return (
-    <button title={title} onClick={onClick} disabled={disabled} className="p-1.5 rounded" style={{ color: disabled ? "#4A5361" : C.text, opacity: disabled ? 0.5 : 1 }}
+    <button title={title} onClick={onClick} disabled={disabled} className="p-1 md:p-1.5 rounded" style={{ color: disabled ? "#4A5361" : C.text, opacity: disabled ? 0.5 : 1 }}
       onMouseEnter={(e) => !disabled && (e.currentTarget.style.background = C.panelAlt)} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
       {children}
     </button>
   );
 }
-function PanelToggle({ children, title, active, onClick }) {
+function PanelToggle({ children, title, onClick }) {
   return (
-    <button title={title} onClick={onClick} className="w-10 h-10 flex justify-center items-center rounded cursor-pointer" style={{ background: active ? C.goldSoft : "transparent", color: active ? C.gold : C.muted }}>
+    <button title={title} onClick={onClick} className="w-8 h-8 flex justify-center items-center rounded cursor-pointer text-[#C6AEE0] hover:bg-[#462C7D]">
       {children}
     </button>
   );
 }
 function ToolBtn({ children, title, active, disabled, onClick }) {
   return (
-    <button title={title} onClick={onClick} disabled={disabled} className="w-10 h-10 rounded flex items-center justify-center" style={{ background: active ? C.goldSoft : "transparent", color: disabled ? "#4A5361" : active ? C.gold : C.muted, opacity: disabled ? 0.5 : 1 }}>
+    <button title={title} onClick={onClick} disabled={disabled} className="w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center" style={{ background: active ? C.goldSoft : "transparent", color: disabled ? "#4A5361" : active ? C.gold : C.muted, opacity: disabled ? 0.5 : 1 }}>
       {children}
     </button>
   );
@@ -1478,31 +1067,31 @@ function Panel({ title, icon, open, collapsed, onToggleCollapse, onClose, childr
   if (!open) return null;
   return (
     <div style={{ borderBottom: noBorder ? "none" : `1px solid ${C.line}` }}>
-      <div className="flex items-center justify-between px-4 py-2.5 cursor-pointer" onClick={onToggleCollapse} style={{ background: collapsed ? "transparent" : "rgba(0,0,0,0.15)" }}>
-        <div className="flex items-center gap-1.5" style={{ color: C.muted }}>{icon}<span className="text-xs uppercase tracking-wide font-semibold">{title}</span></div>
+      <div className="flex items-center justify-between px-3 py-2 cursor-pointer" onClick={onToggleCollapse} style={{ background: collapsed ? "transparent" : "rgba(0,0,0,0.15)" }}>
+        <div className="flex items-center gap-1.5" style={{ color: C.muted }}>{icon}<span className="text-[10px] md:text-xs uppercase tracking-wide font-semibold">{title}</span></div>
         <div className="flex items-center gap-0.5">
-          <button onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }} style={{ color: C.muted }} className="p-0.5">{collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}</button>
-          <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: C.muted }} className="p-0.5" title="Tutup panel"><X size={14} /></button>
+          <button onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }} style={{ color: C.muted }} className="p-0.5">{collapsed ? <ChevronDown size={12} /> : <ChevronUp size={12} />}</button>
+          <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: C.muted }} className="p-0.5"><X size={12} /></button>
         </div>
       </div>
-      {!collapsed && <div className="px-4 pt-3 pb-4">{children}</div>}
+      {!collapsed && <div className="px-3 pt-2 pb-3">{children}</div>}
     </div>
   );
 }
 function ToggleRow({ label, checked, onChange }) {
   return (
     <label className="flex items-center justify-between py-1 cursor-pointer">
-      <span className="text-xs" style={{ color: C.text }}>{label}</span>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span className="text-[11px]" style={{ color: C.text }}>{label}</span>
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="scale-90" />
     </label>
   );
 }
 function Swatch({ color, active, onClick }) {
-  return <button onClick={onClick} className="w-6 h-6 rounded" style={{ background: color, border: active ? `2px solid ${C.gold}` : `1px solid ${C.line}`, boxShadow: active ? "0 0 0 1px rgba(0,0,0,0.4)" : "none" }} />;
+  return <button onClick={onClick} className="w-5 h-5 md:w-6 md:h-6 rounded" style={{ background: color, border: active ? `2px solid ${C.gold}` : `1px solid ${C.line}`, boxShadow: active ? "0 0 0 1px rgba(0,0,0,0.4)" : "none" }} />;
 }
 function MiniStampCells({ cells, w, h, color }) {
   return (
-    <svg width="28" height="28" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet">
+    <svg width="100%" height="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet">
       {cells.map(([x, y], i) => (<rect key={i} x={x} y={y} width={1} height={1} fill={color} />))}
     </svg>
   );
@@ -1511,23 +1100,23 @@ function LayerRow({ layer, active, onSelect, onToggleVisible, onToggleLock, onRe
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(layer.name);
   return (
-    <div onClick={onSelect} className="rounded px-2 py-2 cursor-pointer" style={{ background: active ? C.goldSoft : C.panelAlt, border: `1px solid ${active ? C.gold : C.line}` }}>
-      <div className="flex items-center gap-1.5">
-        <button onClick={(e) => { e.stopPropagation(); onToggleVisible(); }} style={{ color: C.muted }}>{layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}</button>
-        <button onClick={(e) => { e.stopPropagation(); onToggleLock(); }} style={{ color: C.muted }}>{layer.locked ? <Lock size={14} /> : <Unlock size={14} />}</button>
+    <div onClick={onSelect} className="rounded px-2 py-1.5 cursor-pointer" style={{ background: active ? C.goldSoft : C.panelAlt, border: `1px solid ${active ? C.gold : C.line}` }}>
+      <div className="flex items-center gap-1">
+        <button onClick={(e) => { e.stopPropagation(); onToggleVisible(); }} style={{ color: C.muted }}>{layer.visible ? <Eye size={12} /> : <EyeOff size={12} />}</button>
+        <button onClick={(e) => { e.stopPropagation(); onToggleLock(); }} style={{ color: C.muted }}>{layer.locked ? <Lock size={12} /> : <Unlock size={12} />}</button>
         {editing ? (
-          <input autoFocus value={name} onChange={(e) => setName(e.target.value)} onBlur={() => { setEditing(false); onRename(name); }} onKeyDown={(e) => e.key === "Enter" && e.target.blur()} onClick={(e) => e.stopPropagation()} className="flex-1 text-xs px-1 py-0.5 rounded min-w-0" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
+          <input autoFocus value={name} onChange={(e) => setName(e.target.value)} onBlur={() => { setEditing(false); onRename(name); }} onKeyDown={(e) => e.key === "Enter" && e.target.blur()} onClick={(e) => e.stopPropagation()} className="flex-1 text-[10px] px-1 py-0.5 rounded min-w-0" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
         ) : (
-          <span onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }} className="flex-1 text-xs truncate" title="Klik dua kali untuk ubah nama">{layer.name}</span>
+          <span onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }} className="flex-1 text-[10px] truncate">{layer.name}</span>
         )}
-        <button onClick={(e) => { e.stopPropagation(); onMoveUp(); }} style={{ color: C.muted }}><ChevronUp size={13} /></button>
-        <button onClick={(e) => { e.stopPropagation(); onMoveDown(); }} style={{ color: C.muted }}><ChevronDown size={13} /></button>
-        <button onClick={(e) => { e.stopPropagation(); onDuplicate(); }} style={{ color: C.muted }}><Copy size={13} /></button>
-        <button onClick={(e) => { e.stopPropagation(); onMerge(); }} title="Gabung ke bawah" style={{ color: C.muted }}><ArrowUpDown size={13} /></button>
-        {canDelete && (<button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ color: C.danger }}><Trash2 size={13} /></button>)}
+        <button onClick={(e) => { e.stopPropagation(); onMoveUp(); }} style={{ color: C.muted }}><ChevronUp size={12} /></button>
+        <button onClick={(e) => { e.stopPropagation(); onMoveDown(); }} style={{ color: C.muted }}><ChevronDown size={12} /></button>
+        <button onClick={(e) => { e.stopPropagation(); onDuplicate(); }} style={{ color: C.muted }}><Copy size={12} /></button>
+        <button onClick={(e) => { e.stopPropagation(); onMerge(); }} style={{ color: C.muted }}><ArrowUpDown size={12} /></button>
+        {canDelete && (<button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ color: C.danger }}><Trash2 size={12} /></button>)}
       </div>
-      <div className="flex items-center gap-2 mt-1.5">
-        <span className="text-[10px]" style={{ color: C.muted }}>Opasitas</span>
+      <div className="flex items-center gap-2 mt-1">
+        <span className="text-[9px]" style={{ color: C.muted }}>Opasitas</span>
         <input type="range" min={0} max={1} step={0.05} value={layer.opacity} onClick={(e) => e.stopPropagation()} onChange={(e) => onOpacity(Number(e.target.value))} className="flex-1 h-1" />
       </div>
     </div>

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Pencil, Eraser, MousePointer2, PaintBucket, RotateCw, Stamp, Plus, Trash2,
-  Eye, EyeOff, Lock, Unlock, Copy, ChevronUp, ChevronDown, Undo2, Redo2,
+  Eye, EyeOff, Lock, Unlock, Copy, ChevronUp, ChevronDown, ChevronRight, Undo2, Redo2,
   ZoomIn, ZoomOut, FilePlus2, FolderOpen, Save, Image as ImageIcon, FileText,
-  Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Pin, Upload,
+  Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Upload,
   Slash, Square,
 } from "lucide-react";
 
@@ -134,7 +134,7 @@ const BUILTIN_STAMPS = STAMP_ORDER.map((id) => {
     builtin: true,
   };
 });
-const MAX_STAMP = 64; // generous safety ceiling, not a real design limit
+const MAX_STAMP = 64; 
 
 function rotSteps(rotation) {
   return (((rotation / 90) % 4) + 4) % 4;
@@ -142,14 +142,11 @@ function rotSteps(rotation) {
 function rotatedDims(w, h, steps) {
   return steps % 2 === 1 ? { w: h, h: w } : { w, h };
 }
-/* the bounding box a stamp currently occupies on the canvas grid, after rotation
-   (used for placement clamping, dragging, hit-testing, and the selection highlight) */
 function getEffectiveFootprint(st) {
   const steps = rotSteps(st.rotation);
   return rotatedDims(st.footprintW, st.footprintH, steps);
 }
 
-/* CSV -> stamp pattern, e.g. "000;010;000" (rows separated by ";", 1 = filled). */
 function parseStampCSV(csv) {
   if (!csv || !csv.trim()) return null;
   const rows = csv.trim().split(";").map((r) => r.trim()).filter((r) => r.length > 0);
@@ -164,11 +161,6 @@ function parseStampCSV(csv) {
   return { w, h, cells };
 }
 
-/* shared stamp renderer — used by the live canvas, both export paths, and the hover ghost.
-   A stamp's pattern resolution (patternW×patternH, or the source image's own pixels) is
-   completely independent from footprintW×footprintH (how many canvas cells it occupies) —
-   the pattern is simply scaled to fill whatever footprint box is chosen. This is what lets
-   a 3×3 pattern fit inside a single cell, or a 5×5 pattern compress into a 3×3 footprint. */
 function drawStampOnCtx(ctx, st, cellPx, imageCacheRef, onImageReady, alpha) {
   const prevAlpha = ctx.globalAlpha;
   if (alpha !== undefined) ctx.globalAlpha = prevAlpha * alpha;
@@ -245,13 +237,14 @@ export default function SahabatKuApp() {
   const [showGrid, setShowGrid] = useState(true);
   const [showAltShading, setShowAltShading] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [exportScale, setExportScale] = useState(16); // px per cell for export
+  const [exportScale, setExportScale] = useState(16);
 
   const [project, setProject] = useState(() => {
     const l = makeLayer("Layer 1");
     return { layers: [l], activeLayerId: l.id };
   });
 
+  // TOOL DEFAULT: Pensil
   const [activeTool, setActiveTool] = useState("pencil");
   const [rectFilled, setRectFilled] = useState(false);
   const [activeColor, setActiveColor] = useState("#FF70BF");
@@ -268,8 +261,8 @@ export default function SahabatKuApp() {
   const [nextStampRotation, setNextStampRotation] = useState(0);
   const [nextFootprintW, setNextFootprintW] = useState(3);
   const [nextFootprintH, setNextFootprintH] = useState(3);
-  const [customCsvStamps, setCustomCsvStamps] = useState([]); // {id,kind:'cells',w,h,cells,label}
-  const [customImageStamps, setCustomImageStamps] = useState([]); // {id,kind:'image',dataUrl,label}
+  const [customCsvStamps, setCustomCsvStamps] = useState([]); 
+  const [customImageStamps, setCustomImageStamps] = useState([]); 
   const [csvText, setCsvText] = useState("");
   const [csvName, setCsvName] = useState("");
   const [showCsvForm, setShowCsvForm] = useState(false);
@@ -282,7 +275,6 @@ export default function SahabatKuApp() {
       setNextFootprintW(chosenStamp.w);
       setNextFootprintH(chosenStamp.h);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stampChoiceId]);
 
   const [customW, setCustomW] = useState(32);
@@ -293,13 +285,10 @@ export default function SahabatKuApp() {
   const [movingSelection, setMovingSelection] = useState(false);
   const [draggingStamp, setDraggingStamp] = useState(false);
   const [, forceTick] = useState(0);
-
-  const [sidebarHovered, setSidebarHovered] = useState(false);
-  const [sidebarPinned, setSidebarPinned] = useState(false);
-  const sidebarExpanded = sidebarHovered || sidebarPinned;
-  const hoverTimerRef = useRef(null);
   
-  // gesture state for zooming
+  // SIDEBAR STATE UPDATE: Explicit toggle for better mobile UX
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+
   const pinchStartDistRef = useRef(null);
   const pinchStartZoomRef = useRef(null);
 
@@ -315,9 +304,9 @@ export default function SahabatKuApp() {
   function closePanel(key) {
     setPanels((p) => ({ ...p, [key]: { ...p[key], open: false } }));
   }
-  function openPanelPinned(key) {
+  function openPanel(key) {
     setPanels((p) => ({ ...p, [key]: { ...p[key], open: true, collapsed: false } }));
-    setSidebarPinned(true);
+    setSidebarExpanded(true);
   }
 
   const canvasRef = useRef(null);
@@ -391,7 +380,6 @@ export default function SahabatKuApp() {
     const cellPx = getCellPx();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    // Handle both mouse/pointer events and touch events
     const clientX = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
     const clientY = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     const x = (clientX - rect.left) * scaleX;
@@ -480,7 +468,6 @@ export default function SahabatKuApp() {
       }
     }
 
-    // hover ghost preview for the stamp tool — transparent, follows the cursor, snapped to grid
     if (activeTool === "stamp" && hoverCell && !draggingStamp && !isDrawing) {
       const steps = rotSteps(nextStampRotation);
       const { w: effW, h: effH } = rotatedDims(nextFootprintW, nextFootprintH, steps);
@@ -508,7 +495,7 @@ export default function SahabatKuApp() {
     drawCanvas();
   }, [drawCanvas]);
 
-  /* --------------------------- pixel-cell painting (drag = continuous line) --------------------------- */
+  /* --------------------------- pixel-cell painting --------------------------- */
   function beginStroke() {
     draftRef.current = deepClone(project);
   }
@@ -717,10 +704,8 @@ export default function SahabatKuApp() {
     else if (selectedStampId) deleteSelectedStamp();
   }
 
-  /* --------------------------- pointer handlers (pointer capture keeps the stroke alive
-     even if the cursor briefly leaves the small canvas element while dragging fast) --------------------------- */
+  /* --------------------------- pointer handlers --------------------------- */
   function handlePointerDown(e) {
-    // Let touch zoom gestures through
     if (e.touches && e.touches.length > 1) return;
     
     e.preventDefault();
@@ -1213,12 +1198,13 @@ export default function SahabatKuApp() {
       {/* ---------- top bar ---------- */}
       <div className="flex items-center gap-3 px-4 h-14 shrink-0 border-b overflow-x-auto overflow-y-hidden" style={{ background: C.panel, borderColor: C.line }}>
         <div className="flex items-center gap-2 mr-1">
-          <div style={{ background: C.gold, width: 22, height: 22, borderRadius: 4 }} className="flex items-center justify-center shrink-0">
-            <span style={{ color: C.chrome, fontSize: 12, fontWeight: 700 }}>ﮐ</span>
-          </div>
-          <span style={{ fontFamily: "'Amiri', serif", fontSize: 20, letterSpacing: 0.3 }} className="shrink-0 whitespace-nowrap">
-            <span style={{ color: C.gold }}>Sa</span>Ku
-          </span>
+          {/* Ganti '/logo.png' dengan path dan nama file yang sesuai di repositori GitHub kamu */}
+          <img 
+            src="/logo.png" 
+            alt="SahabatKu Logo" 
+            style={{ height: "32px", width: "auto", objectFit: "contain" }} 
+            className="shrink-0"
+          />
         </div>
         <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
         <IconBtn title="Baru" onClick={newCanvas}><FilePlus2 size={17} /></IconBtn>

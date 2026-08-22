@@ -6,7 +6,7 @@ import {
   Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Upload,
   Slash, Square,
 } from "lucide-react";
-
+import customLogo from "./logo.png";
 /* ---------------------------------- tokens --------------------------------- */
 const C = {
   chrome: "#2C1B4D",
@@ -1196,11 +1196,9 @@ export default function SahabatKuApp() {
       `}</style>
 
       {/* ---------- top bar ---------- */}
-      <div className="flex items-center gap-3 px-4 h-14 shrink-0 border-b overflow-x-auto overflow-y-hidden" style={{ background: C.panel, borderColor: C.line }}>
-        <div className="flex items-center gap-2 mr-1">
-          {/* Ganti '/logo.png' dengan path dan nama file yang sesuai di repositori GitHub kamu */}
+      <div className="flex items-center gap-2 mr-1">
           <img 
-            src="/logo.png" 
+            src={customLogo} 
             alt="SahabatKu Logo" 
             style={{ height: "32px", width: "auto", objectFit: "contain" }} 
             className="shrink-0"

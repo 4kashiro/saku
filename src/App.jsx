@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Pencil, Eraser, MousePointer2, PaintBucket, RotateCw, Stamp, Plus, Trash2,
-  Eye, EyeOff, Lock, Unlock, Copy, ChevronUp, ChevronDown, ChevronRight, Undo2, Redo2,
+  Eye, EyeOff, Lock, Unlock, Copy, ChevronUp, ChevronDown, ChevronRight, ChevronLeft, Undo2, Redo2,
   ZoomIn, ZoomOut, FilePlus2, FolderOpen, Save, Image as ImageIcon, FileText,
   Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Upload,
-  Slash, Square,
+  Slash, Square, Pin
 } from "lucide-react";
-import customLogo from "./logo.png";
+import customLogo from "./logo.png"; // Pastikan file logo.png ada di folder yang sama
+
 /* ---------------------------------- tokens --------------------------------- */
 const C = {
   chrome: "#2C1B4D",
@@ -136,16 +137,9 @@ const BUILTIN_STAMPS = STAMP_ORDER.map((id) => {
 });
 const MAX_STAMP = 64; 
 
-function rotSteps(rotation) {
-  return (((rotation / 90) % 4) + 4) % 4;
-}
-function rotatedDims(w, h, steps) {
-  return steps % 2 === 1 ? { w: h, h: w } : { w, h };
-}
-function getEffectiveFootprint(st) {
-  const steps = rotSteps(st.rotation);
-  return rotatedDims(st.footprintW, st.footprintH, steps);
-}
+function rotSteps(rotation) { return (((rotation / 90) % 4) + 4) % 4; }
+function rotatedDims(w, h, steps) { return steps % 2 === 1 ? { w: h, h: w } : { w, h }; }
+function getEffectiveFootprint(st) { return rotatedDims(st.footprintW, st.footprintH, rotSteps(st.rotation)); }
 
 function parseStampCSV(csv) {
   if (!csv || !csv.trim()) return null;
@@ -220,15 +214,9 @@ const GRID_PRESETS = [
   { label: "64×64", cols: 64, rows: 64 },
 ];
 
-function uid() {
-  return Math.random().toString(36).slice(2, 10);
-}
-function makeLayer(name) {
-  return { id: uid(), name, visible: true, locked: false, opacity: 1, cells: {}, stamps: [] };
-}
-function deepClone(o) {
-  return JSON.parse(JSON.stringify(o));
-}
+function uid() { return Math.random().toString(36).slice(2, 10); }
+function makeLayer(name) { return { id: uid(), name, visible: true, locked: false, opacity: 1, cells: {}, stamps: [] }; }
+function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
 
 /* --------------------------------- component --------------------------------- */
 export default function SahabatKuApp() {
@@ -244,7 +232,6 @@ export default function SahabatKuApp() {
     return { layers: [l], activeLayerId: l.id };
   });
 
-  // TOOL DEFAULT: Pensil
   const [activeTool, setActiveTool] = useState("pencil");
   const [rectFilled, setRectFilled] = useState(false);
   const [activeColor, setActiveColor] = useState("#FF70BF");
@@ -287,26 +274,29 @@ export default function SahabatKuApp() {
   const [, forceTick] = useState(0);
   
   // SIDEBAR STATE UPDATE: Explicit toggle for better mobile UX
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   const pinchStartDistRef = useRef(null);
   const pinchStartZoomRef = useRef(null);
 
+  // Define panels state mapping
   const [panels, setPanels] = useState({
     grid: { open: true, collapsed: false },
     color: { open: true, collapsed: false },
     stamp: { open: true, collapsed: false },
     layer: { open: true, collapsed: false },
   });
+
   function togglePanelCollapsed(key) {
     setPanels((p) => ({ ...p, [key]: { ...p[key], collapsed: !p[key].collapsed } }));
   }
-  function closePanel(key) {
-    setPanels((p) => ({ ...p, [key]: { ...p[key], open: false } }));
+  function toggleSidebar() {
+    setSidebarExpanded(!sidebarExpanded);
   }
   function openPanel(key) {
-    setPanels((p) => ({ ...p, [key]: { ...p[key], open: true, collapsed: false } }));
-    setSidebarExpanded(true);
+    if(!sidebarExpanded) setSidebarExpanded(true);
+    // Expand the specific panel
+    setPanels((p) => ({ ...p, [key]: { open: true, collapsed: false } }));
   }
 
   const canvasRef = useRef(null);
@@ -362,9 +352,7 @@ export default function SahabatKuApp() {
   const activeLayer = project.layers.find((l) => l.id === project.activeLayerId);
   const displayLayers = [...project.layers].reverse();
 
-  function addRecentColor(color) {
-    setRecentColors((prev) => [color, ...prev.filter((c) => c !== color)].slice(0, 8));
-  }
+  function addRecentColor(color) { setRecentColors((prev) => [color, ...prev.filter((c) => c !== color)].slice(0, 8)); }
   function pickColor(color) {
     setActiveColor(color);
     addRecentColor(color);
@@ -488,17 +476,11 @@ export default function SahabatKuApp() {
     }
   }, [project, gridCols, gridRows, showGrid, showAltShading, zoom, selection, selectedStampId, activeTool, hoverCell, chosenStamp, nextStampRotation, nextFootprintW, nextFootprintH, activeColor, draggingStamp, isDrawing]);
 
-  useEffect(() => {
-    drawCanvasRef.current = drawCanvas;
-  }, [drawCanvas]);
-  useEffect(() => {
-    drawCanvas();
-  }, [drawCanvas]);
+  useEffect(() => { drawCanvasRef.current = drawCanvas; }, [drawCanvas]);
+  useEffect(() => { drawCanvas(); }, [drawCanvas]);
 
   /* --------------------------- pixel-cell painting --------------------------- */
-  function beginStroke() {
-    draftRef.current = deepClone(project);
-  }
+  function beginStroke() { draftRef.current = deepClone(project); }
   function bresenhamLine(x0, y0, x1, y1) {
     const points = [];
     let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
@@ -556,7 +538,7 @@ export default function SahabatKuApp() {
     addRecentColor(fillColor);
   }
 
-  /* --------------------------- selection: move / rotate / delete --------------------------- */
+  /* --------------------------- selection --------------------------- */
   function updateMovePreview(newX0, newY0) {
     const next = deepClone(moveBaselineRef.current);
     const layer = next.layers.find((l) => l.id === next.activeLayerId);
@@ -683,7 +665,7 @@ export default function SahabatKuApp() {
   function handleAddCsvStamp() {
     const parsed = parseStampCSV(csvText);
     if (!parsed || parsed.cells.length === 0) {
-      window.alert(`Format CSV tidak valid atau kosong.\nGunakan 0/1 dipisah titik-koma per baris (contoh: 000;010;000).\nUkuran mengikuti pola Anda, dibatasi hanya untuk keamanan performa di ${MAX_STAMP}×${MAX_STAMP}.`);
+      window.alert(`Format CSV tidak valid atau kosong.`);
       return;
     }
     const entry = { id: uid(), kind: "cells", w: parsed.w, h: parsed.h, cells: parsed.cells, label: csvName.trim() || "Stempel CSV" };
@@ -716,9 +698,8 @@ export default function SahabatKuApp() {
 
     if (activeTool === "pencil" || activeTool === "eraser") {
       beginStroke();
-      if (activeTool === "eraser") {
-        eraseLineLive({ gx, gy }, { gx, gy });
-      } else {
+      if (activeTool === "eraser") eraseLineLive({ gx, gy }, { gx, gy });
+      else {
         paintLineLive({ gx, gy }, { gx, gy }, activeColor);
         addRecentColor(activeColor);
       }
@@ -746,11 +727,8 @@ export default function SahabatKuApp() {
       }
       setSelectedStampId(null);
       if (
-        selection &&
-        gx >= Math.min(selection.x0, selection.x1) &&
-        gx <= Math.max(selection.x0, selection.x1) &&
-        gy >= Math.min(selection.y0, selection.y1) &&
-        gy <= Math.max(selection.y0, selection.y1)
+        selection && gx >= Math.min(selection.x0, selection.x1) && gx <= Math.max(selection.x0, selection.x1) &&
+        gy >= Math.min(selection.y0, selection.y1) && gy <= Math.max(selection.y0, selection.y1)
       ) {
         const x0 = Math.min(selection.x0, selection.x1);
         const y0 = Math.min(selection.y0, selection.y1);
@@ -854,16 +832,7 @@ export default function SahabatKuApp() {
       shapeBaselineRef.current = null;
       shapeStartRef.current = null;
     } else if (isDrawing && activeTool === "select") {
-      setSelection((sel) =>
-        sel
-          ? {
-              x0: Math.min(sel.x0, sel.x1),
-              y0: Math.min(sel.y0, sel.y1),
-              x1: Math.max(sel.x0, sel.x1),
-              y1: Math.max(sel.y0, sel.y1),
-            }
-          : sel
-      );
+      setSelection((sel) => sel ? { x0: Math.min(sel.x0, sel.x1), y0: Math.min(sel.y0, sel.y1), x1: Math.max(sel.x0, sel.x1), y1: Math.max(sel.y0, sel.y1) } : sel);
     } else if (movingSelection) {
       pushHistory(draftRef.current);
       draftRef.current = null;
@@ -883,9 +852,7 @@ export default function SahabatKuApp() {
   }
   
   /* --------------------------- gesture pinch to zoom --------------------------- */
-  function getDistance(t1, t2) {
-    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-  }
+  function getDistance(t1, t2) { return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
   
   function handleTouchStart(e) {
     if (e.touches.length === 2) {
@@ -1036,9 +1003,7 @@ export default function SahabatKuApp() {
     if (next.activeLayerId === cur.id) next.activeLayerId = below.id;
     commit(next);
   }
-  function setActiveLayerId(id) {
-    setProject((p) => ({ ...p, activeLayerId: id }));
-  }
+  function setActiveLayerId(id) { setProject((p) => ({ ...p, activeLayerId: id })); }
 
   /* --------------------------- file management --------------------------- */
   function newCanvas() {
@@ -1174,7 +1139,6 @@ export default function SahabatKuApp() {
       setTimeout(() => document.body.removeChild(iframe), 1000);
     };
   }
-
   function zoomStep(dir) {
     const idx = ZOOM_STEPS.indexOf(zoom);
     const newIdx = Math.max(0, Math.min(ZOOM_STEPS.length - 1, (idx === -1 ? 2 : idx) + dir));
@@ -1196,7 +1160,8 @@ export default function SahabatKuApp() {
       `}</style>
 
       {/* ---------- top bar ---------- */}
-      <div className="flex items-center gap-2 mr-1">
+      <div className="flex items-center gap-2 px-4 h-14 shrink-0 border-b overflow-x-auto overflow-y-hidden" style={{ background: C.panel, borderColor: C.line }}>
+        <div className="flex items-center gap-2 mr-2">
           <img 
             src={customLogo} 
             alt="SahabatKu Logo" 
@@ -1214,8 +1179,8 @@ export default function SahabatKuApp() {
         <IconBtn title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}><Undo2 size={17} /></IconBtn>
         <IconBtn title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={redo}><Redo2 size={17} /></IconBtn>
         
-        <div className="hidden md:block w-px h-6 shrink-0" style={{ background: C.line }} />
-        <div className="hidden md:flex items-center shrink-0">
+        <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
+        <div className="flex items-center shrink-0">
             <IconBtn title="Perkecil" onClick={() => zoomStep(-1)}><ZoomOut size={17} /></IconBtn>
             <span className="text-xs w-10 text-center" style={{ color: C.muted }}>{Math.round(zoom * 100)}%</span>
             <IconBtn title="Perbesar" onClick={() => zoomStep(1)}><ZoomIn size={17} /></IconBtn>
@@ -1223,8 +1188,8 @@ export default function SahabatKuApp() {
         
         <div className="flex-1 shrink-0 min-w-4" />
         
-        {/* Export Dropdown & Buttons (hidden on small screens) */}
-        <div className="hidden sm:flex items-center gap-1 shrink-0">
+        {/* Export Dropdown & Buttons (now always visible on all devices) */}
+        <div className="flex items-center gap-1 shrink-0">
             <select 
                title="Skala Export (px per kotak)" 
                value={exportScale} 
@@ -1242,20 +1207,13 @@ export default function SahabatKuApp() {
             <IconBtn title="Export SVG" onClick={exportSVG}><FileText size={17} /></IconBtn>
             <IconBtn title="Export PDF (cetak browser)" onClick={exportPDF}><Printer size={17} /></IconBtn>
         </div>
-
-        <div className="w-px h-6 shrink-0" style={{ background: C.line }} />
-        <div className="flex items-center shrink-0">
-            <PanelToggle title="Panel Grid" active={panels.grid.open} onClick={() => openPanelPinned("grid")}><Grid3x3 size={16} /></PanelToggle>
-            <PanelToggle title="Panel Warna" active={panels.color.open} onClick={() => openPanelPinned("color")}><Palette size={16} /></PanelToggle>
-            <PanelToggle title="Panel Stempel" active={panels.stamp.open} onClick={() => openPanelPinned("stamp")}><Stamp size={16} /></PanelToggle>
-            <PanelToggle title="Panel Layer" active={panels.layer.open} onClick={() => openPanelPinned("layer")}><LayersIcon size={16} /></PanelToggle>
-        </div>
       </div>
 
       {/* ---------- main area ---------- */}
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 min-h-0 relative">
+        
         {/* left toolbar */}
-        <div className="w-14 shrink-0 border-r flex flex-col items-center py-3 gap-1" style={{ background: C.panel, borderColor: C.line }}>
+        <div className="w-14 shrink-0 border-r flex flex-col items-center py-3 gap-1 z-20" style={{ background: C.panel, borderColor: C.line }}>
           <ToolBtn active={activeTool === "pencil"} title="Pensil (klik & seret)" onClick={() => setActiveTool("pencil")}><Pencil size={18} /></ToolBtn>
           <ToolBtn active={activeTool === "eraser"} title="Penghapus (klik & seret — juga menghapus stempel)" onClick={() => setActiveTool("eraser")}><Eraser size={18} /></ToolBtn>
           <ToolBtn active={activeTool === "select"} title="Pilih / Select" onClick={() => setActiveTool("select")}><MousePointer2 size={18} /></ToolBtn>
@@ -1311,179 +1269,180 @@ export default function SahabatKuApp() {
           </p>
         </div>
 
-        {/* right: auto-hide dock */}
-        <div
-          onMouseEnter={() => { clearTimeout(hoverTimerRef.current); setSidebarHovered(true); }}
-          onMouseLeave={() => { hoverTimerRef.current = setTimeout(() => setSidebarHovered(false), 350); }}
-          className="shrink-0 border-l flex"
-          style={{ width: sidebarExpanded ? 288 : 44, transition: "width 0.18s ease", background: C.panel, borderColor: C.line, overflow: "hidden" }}
-        >
-          {sidebarExpanded ? (
-            <div className="w-72 overflow-y-auto flex-1">
-              <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: C.line }}>
-                <span className="text-xs" style={{ color: C.muted }}>Panel (auto-hide)</span>
-                <button
-                  title={sidebarPinned ? "Lepas pin — panel akan auto-hide lagi" : "Pin panel agar tetap terbuka"}
-                  onClick={() => setSidebarPinned((p) => !p)}
-                  className="p-1 rounded"
-                  style={{ color: sidebarPinned ? C.gold : C.muted, background: sidebarPinned ? C.goldSoft : "transparent" }}
-                >
-                  <Pin size={14} fill={sidebarPinned ? C.gold : "none"} />
-                </button>
+        {/* Right Sidebar Area */}
+        <div className="flex shrink-0 border-l relative h-full bg-[#3A2266] z-20" style={{ borderColor: C.line }}>
+          
+          {/* Collapse/Expand Toggle Button - Now attached cleanly to the edge */}
+          <div 
+             onClick={toggleSidebar}
+             className="absolute -left-6 top-1/2 -translate-y-1/2 w-6 h-12 flex items-center justify-center cursor-pointer shadow-md rounded-l-md" 
+             style={{ background: C.goldSoft, border: `1px solid ${C.line}`, borderRight: "none", zIndex: 30 }}
+             title={sidebarExpanded ? "Tutup Panel" : "Buka Panel"}
+          >
+            {sidebarExpanded ? <ChevronRight size={16} color={C.gold} /> : <ChevronLeft size={16} color={C.gold} />}
+          </div>
+
+          {/* Collapsed State: Icon Bar Only */}
+          {!sidebarExpanded && (
+            <div className="w-12 h-full flex flex-col items-center py-4 gap-3 bg-[#3A2266]">
+              <PanelToggle title="Buka Panel Grid" active={panels.grid.open} onClick={() => openPanel("grid")}><Grid3x3 size={18} /></PanelToggle>
+              <PanelToggle title="Buka Panel Warna" active={panels.color.open} onClick={() => openPanel("color")}><Palette size={18} /></PanelToggle>
+              <PanelToggle title="Buka Panel Stempel" active={panels.stamp.open} onClick={() => openPanel("stamp")}><Stamp size={18} /></PanelToggle>
+              <PanelToggle title="Buka Panel Layer" active={panels.layer.open} onClick={() => openPanel("layer")}><LayersIcon size={18} /></PanelToggle>
+            </div>
+          )}
+
+          {/* Expanded State: Full Panels */}
+          {sidebarExpanded && (
+            <div className="w-72 h-full flex flex-col bg-[#3A2266]">
+              <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: C.line }}>
+                <span className="text-sm font-semibold text-[#F6EEFA]">Panel Kontrol</span>
               </div>
-
-              <Panel title="Kanvas & Grid" icon={<Grid3x3 size={13} />} open={panels.grid.open} collapsed={panels.grid.collapsed} onToggleCollapse={() => togglePanelCollapsed("grid")} onClose={() => closePanel("grid")}>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {GRID_PRESETS.map((p) => (
-                    <button key={p.label} onClick={() => applyGridSize(p.cols, p.rows, p.label)} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === p.label ? C.gold : C.line, color: gridSizeLabel === p.label ? C.gold : C.text }}>{p.label}</button>
-                  ))}
-                  <button onClick={() => setGridSizeLabel("custom")} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === "custom" ? C.gold : C.line, color: gridSizeLabel === "custom" ? C.gold : C.text }}>Custom</button>
-                </div>
-                {gridSizeLabel === "custom" && (
-                  <div className="flex items-center gap-2 mb-3">
-                    <input type="number" min={4} max={128} value={customW} onChange={(e) => setCustomW(Number(e.target.value))} className="w-14 text-xs px-1.5 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                    <span className="text-xs" style={{ color: C.muted }}>×</span>
-                    <input type="number" min={4} max={128} value={customH} onChange={(e) => setCustomH(Number(e.target.value))} className="w-14 text-xs px-1.5 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                    <button onClick={() => applyGridSize(customW, customH, "custom")} className="text-xs px-2 py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Terapkan</button>
+              
+              {/* Scrollable Panels Area */}
+              <div className="flex-1 overflow-y-auto">
+                <Panel title="Kanvas & Grid" icon={<Grid3x3 size={14} />} open={panels.grid.open} collapsed={panels.grid.collapsed} onToggleCollapse={() => togglePanelCollapsed("grid")} onClose={() => closePanel("grid")}>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {GRID_PRESETS.map((p) => (
+                      <button key={p.label} onClick={() => applyGridSize(p.cols, p.rows, p.label)} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === p.label ? C.gold : C.line, color: gridSizeLabel === p.label ? C.gold : C.text }}>{p.label}</button>
+                    ))}
+                    <button onClick={() => setGridSizeLabel("custom")} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === "custom" ? C.gold : C.line, color: gridSizeLabel === "custom" ? C.gold : C.text }}>Custom</button>
                   </div>
-                )}
-                <ToggleRow label="Tampilkan Grid" checked={showGrid} onChange={setShowGrid} />
-                <ToggleRow label="Grid Alternatif (kotak selang-seling)" checked={showAltShading} onChange={setShowAltShading} />
-                <p className="text-xs mt-1.5 leading-relaxed" style={{ color: C.muted }}>Ubah ukuran grid akan menskalakan ulang gambar bebas. Stempel tidak berubah karena tersimpan sebagai objek.</p>
-              </Panel>
+                  {gridSizeLabel === "custom" && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <input type="number" min={4} max={128} value={customW} onChange={(e) => setCustomW(Number(e.target.value))} className="w-14 text-xs px-1.5 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
+                      <span className="text-xs" style={{ color: C.muted }}>×</span>
+                      <input type="number" min={4} max={128} value={customH} onChange={(e) => setCustomH(Number(e.target.value))} className="w-14 text-xs px-1.5 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
+                      <button onClick={() => applyGridSize(customW, customH, "custom")} className="text-xs px-2 py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Terapkan</button>
+                    </div>
+                  )}
+                  <ToggleRow label="Tampilkan Grid" checked={showGrid} onChange={setShowGrid} />
+                  <ToggleRow label="Grid Alternatif (kotak selang-seling)" checked={showAltShading} onChange={setShowAltShading} />
+                  <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: C.muted }}>Ubah ukuran grid menskalakan ulang gambar bebas. Stempel tidak berubah.</p>
+                </Panel>
 
-              <Panel title="Warna" icon={<Palette size={13} />} open={panels.color.open} collapsed={panels.color.collapsed} onToggleCollapse={() => togglePanelCollapsed("color")} onClose={() => closePanel("color")}>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-9 h-9 rounded border-2" style={{ background: activeColor, borderColor: C.line }} />
-                  <input type="color" value={pickerColor} onChange={(e) => { setPickerColor(e.target.value); pickColor(e.target.value); }} className="w-9 h-9 rounded cursor-pointer" />
-                  <button title="Simpan ke palet custom" onClick={() => setCustomPalette((prev) => (prev.includes(pickerColor) ? prev : [...prev, pickerColor].slice(-16)))} className="text-xs px-2 py-1.5 rounded flex items-center gap-1" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><Plus size={12} /> Palet</button>
-                </div>
-                <select value={activePaletteName} onChange={(e) => setActivePaletteName(e.target.value)} className="w-full text-xs px-2 py-1.5 rounded mb-2" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}>
-                  {Object.keys(PALETTES).map((name) => (<option key={name} value={name}>{name}</option>))}
-                </select>
-                <div className="flex flex-wrap gap-1.5 mb-3">{PALETTES[activePaletteName].map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div>
-                {customPalette.length > 0 && (<><p className="text-xs mb-1" style={{ color: C.muted }}>Palet Custom</p><div className="flex flex-wrap gap-1.5 mb-3">{customPalette.map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
-                {recentColors.length > 0 && (<><p className="text-xs mb-1" style={{ color: C.muted }}>Terakhir Dipakai</p><div className="flex flex-wrap gap-1.5">{recentColors.map((c, i) => (<Swatch key={c + i} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
-              </Panel>
+                <Panel title="Warna" icon={<Palette size={14} />} open={panels.color.open} collapsed={panels.color.collapsed} onToggleCollapse={() => togglePanelCollapsed("color")} onClose={() => closePanel("color")}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-9 h-9 rounded border-2" style={{ background: activeColor, borderColor: C.line }} />
+                    <input type="color" value={pickerColor} onChange={(e) => { setPickerColor(e.target.value); pickColor(e.target.value); }} className="w-9 h-9 rounded cursor-pointer" />
+                    <button title="Simpan ke palet custom" onClick={() => setCustomPalette((prev) => (prev.includes(pickerColor) ? prev : [...prev, pickerColor].slice(-16)))} className="text-xs px-2 py-1.5 rounded flex items-center gap-1" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><Plus size={12} /> Palet</button>
+                  </div>
+                  <select value={activePaletteName} onChange={(e) => setActivePaletteName(e.target.value)} className="w-full text-xs px-2 py-1.5 rounded mb-2" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}>
+                    {Object.keys(PALETTES).map((name) => (<option key={name} value={name}>{name}</option>))}
+                  </select>
+                  <div className="flex flex-wrap gap-1.5 mb-3">{PALETTES[activePaletteName].map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div>
+                  {customPalette.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>Palet Custom</p><div className="flex flex-wrap gap-1.5 mb-3">{customPalette.map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
+                  {recentColors.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>Terakhir Dipakai</p><div className="flex flex-wrap gap-1.5">{recentColors.map((c, i) => (<Swatch key={c + i} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
+                </Panel>
 
-              <Panel title="Stempel" icon={<Stamp size={13} />} open={panels.stamp.open} collapsed={panels.stamp.collapsed} onToggleCollapse={() => togglePanelCollapsed("stamp")} onClose={() => closePanel("stamp")}>
-                <p className="text-xs mb-1.5" style={{ color: C.muted }}>Bentuk Bawaan</p>
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                  {BUILTIN_STAMPS.map((s) => (
-                    <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1.5 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
-                      <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-xs" style={{ color: C.muted }}>Stempel dari CSV (ukuran bebas)</p>
-                  <button onClick={() => setShowCsvForm((s) => !s)} className="text-xs px-1.5 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>{showCsvForm ? "Tutup" : "+ Baru"}</button>
-                </div>
-                {customCsvStamps.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    {customCsvStamps.map((s) => (
+                <Panel title="Stempel" icon={<Stamp size={14} />} open={panels.stamp.open} collapsed={panels.stamp.collapsed} onToggleCollapse={() => togglePanelCollapsed("stamp")} onClose={() => closePanel("stamp")}>
+                  <p className="text-xs mb-1.5" style={{ color: C.muted }}>Bentuk Bawaan</p>
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    {BUILTIN_STAMPS.map((s) => (
                       <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1.5 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
                         <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
                       </button>
                     ))}
                   </div>
-                )}
-                {showCsvForm && (
-                  <div className="mb-3 p-2 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-                    <input value={csvName} onChange={(e) => setCsvName(e.target.value)} placeholder="Nama stempel (mis. Alif)" className="w-full text-xs px-2 py-1.5 rounded mb-1.5" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
-                    <textarea
-                      value={csvText}
-                      onChange={(e) => setCsvText(e.target.value)}
-                      placeholder={"000000000;000000000;000010000;000010000;000010000;000010000;000010000;000000000;000000000"}
-                      rows={4}
-                      className="w-full text-[10px] font-mono px-2 py-1.5 rounded mb-1.5 leading-relaxed"
-                      style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }}
-                    />
-                    <p className="text-[10px] mb-2 leading-relaxed" style={{ color: C.muted }}>Setiap baris dipisah titik-koma (;). 1 = sel terisi, 0 = kosong. Ukuran mengikuti pola Anda apa adanya (lebar = karakter terpanjang, tinggi = jumlah baris) — tidak harus persegi atau berukuran tetap.</p>
-                    <button onClick={handleAddCsvStamp} className="w-full text-xs py-1.5 rounded" style={{ background: C.gold, color: C.chrome }}>Tambah Stempel</button>
-                  </div>
-                )}
 
-                <p className="text-xs mb-1.5" style={{ color: C.muted }}>Stempel Custom (gambar sendiri)</p>
-                <div className="grid grid-cols-3 gap-2 mb-2">
-                  {customImageStamps.map((cs) => (
-                    <button key={cs.id} title={cs.label} onClick={() => { setStampChoiceId(cs.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center overflow-hidden" style={{ borderColor: stampChoiceId === cs.id ? C.gold : C.line, background: C.panelAlt }}>
-                      <img src={cs.dataUrl} alt={cs.label} className="w-full h-full object-contain" />
-                    </button>
-                  ))}
-                  <button onClick={() => stampUploadRef.current.click()} className="aspect-square rounded border border-dashed flex items-center justify-center" style={{ borderColor: C.line, color: C.muted }} title="Unggah gambar stempel">
-                    <Upload size={16} />
-                  </button>
-                  <input ref={stampUploadRef} type="file" accept="image/*" className="hidden" onChange={handleUploadStamp} />
-                </div>
-                <div className="mb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs" style={{ color: C.muted }}>Ukuran di Kanvas</span>
-                    {chosenStamp.kind === "cells" && (
-                      <button
-                        onClick={() => { setNextFootprintW(chosenStamp.w); setNextFootprintH(chosenStamp.h); }}
-                        className="text-[10px] px-1.5 py-0.5 rounded"
-                        style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}
-                      >
-                        Ukuran asli ({chosenStamp.w}×{chosenStamp.h})
-                      </button>
-                    )}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="text-xs" style={{ color: C.muted }}>Stempel dari CSV</p>
+                    <button onClick={() => setShowCsvForm((s) => !s)} className="text-xs px-1.5 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>{showCsvForm ? "Tutup" : "+ Baru"}</button>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <input type="number" min={1} max={MAX_STAMP} value={nextFootprintW} onChange={(e) => setNextFootprintW(Math.max(1, Math.min(MAX_STAMP, Number(e.target.value) || 1)))} className="w-14 text-xs px-1.5 py-1 rounded text-center" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                    <span className="text-xs" style={{ color: C.muted }}>×</span>
-                    <input type="number" min={1} max={MAX_STAMP} value={nextFootprintH} onChange={(e) => setNextFootprintH(Math.max(1, Math.min(MAX_STAMP, Number(e.target.value) || 1)))} className="w-14 text-xs px-1.5 py-1 rounded text-center" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                    <span className="text-xs" style={{ color: C.muted }}>sel</span>
-                  </div>
-                  {chosenStamp.kind === "cells" && (nextFootprintW !== chosenStamp.w || nextFootprintH !== chosenStamp.h) && (
-                    <p className="text-[10px] mt-1 leading-relaxed" style={{ color: C.muted }}>
-                      Pola {chosenStamp.w}×{chosenStamp.h} akan dipadatkan/diregangkan menjadi {nextFootprintW}×{nextFootprintH} sel di kanvas — cocok untuk memuat detail halus dalam ruang terbatas.
-                    </p>
+                  {customCsvStamps.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 mb-2">
+                      {customCsvStamps.map((s) => (
+                        <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1.5 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+                          <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
+                        </button>
+                      ))}
+                    </div>
                   )}
-                </div>
-                <p className="text-xs mb-3 leading-relaxed" style={{ color: C.muted }}>PNG transparan persegi memberi hasil terbaik untuk stempel gambar.</p>
+                  {showCsvForm && (
+                    <div className="mb-3 p-2 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
+                      <input value={csvName} onChange={(e) => setCsvName(e.target.value)} placeholder="Nama stempel (mis. Alif)" className="w-full text-xs px-2 py-1.5 rounded mb-1.5" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
+                      <textarea
+                        value={csvText}
+                        onChange={(e) => setCsvText(e.target.value)}
+                        placeholder={"000;010;000"}
+                        rows={3}
+                        className="w-full text-[10px] font-mono px-2 py-1.5 rounded mb-1.5 leading-relaxed"
+                        style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }}
+                      />
+                      <button onClick={handleAddCsvStamp} className="w-full text-xs py-1.5 rounded" style={{ background: C.gold, color: C.chrome }}>Tambah Stempel</button>
+                    </div>
+                  )}
 
-                <div className="flex items-center justify-between">
-                  <span className="text-xs" style={{ color: C.muted }}>Rotasi stempel berikutnya</span>
-                  <button onClick={() => setNextStampRotation((r) => (r + 90) % 360)} className="flex items-center gap-1 text-xs px-2 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><RotateCw size={12} /> {nextStampRotation}°</button>
-                </div>
-              </Panel>
+                  <p className="text-xs mb-1.5" style={{ color: C.muted }}>Stempel Custom (gambar)</p>
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    {customImageStamps.map((cs) => (
+                      <button key={cs.id} title={cs.label} onClick={() => { setStampChoiceId(cs.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center overflow-hidden" style={{ borderColor: stampChoiceId === cs.id ? C.gold : C.line, background: C.panelAlt }}>
+                        <img src={cs.dataUrl} alt={cs.label} className="w-full h-full object-contain" />
+                      </button>
+                    ))}
+                    <button onClick={() => stampUploadRef.current.click()} className="aspect-square rounded border border-dashed flex items-center justify-center" style={{ borderColor: C.line, color: C.muted }} title="Unggah gambar stempel">
+                      <Upload size={16} />
+                    </button>
+                    <input ref={stampUploadRef} type="file" accept="image/*" className="hidden" onChange={handleUploadStamp} />
+                  </div>
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs" style={{ color: C.muted }}>Ukuran di Kanvas</span>
+                      {chosenStamp.kind === "cells" && (
+                        <button
+                          onClick={() => { setNextFootprintW(chosenStamp.w); setNextFootprintH(chosenStamp.h); }}
+                          className="text-[10px] px-1.5 py-0.5 rounded"
+                          style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}
+                        >
+                          Asli ({chosenStamp.w}×{chosenStamp.h})
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <input type="number" min={1} max={MAX_STAMP} value={nextFootprintW} onChange={(e) => setNextFootprintW(Math.max(1, Math.min(MAX_STAMP, Number(e.target.value) || 1)))} className="w-14 text-xs px-1.5 py-1 rounded text-center" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
+                      <span className="text-xs" style={{ color: C.muted }}>×</span>
+                      <input type="number" min={1} max={MAX_STAMP} value={nextFootprintH} onChange={(e) => setNextFootprintH(Math.max(1, Math.min(MAX_STAMP, Number(e.target.value) || 1)))} className="w-14 text-xs px-1.5 py-1 rounded text-center" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
+                      <span className="text-xs" style={{ color: C.muted }}>sel</span>
+                    </div>
+                  </div>
 
-              <Panel title="Layer" icon={<LayersIcon size={13} />} open={panels.layer.open} collapsed={panels.layer.collapsed} onToggleCollapse={() => togglePanelCollapsed("layer")} onClose={() => closePanel("layer")} noBorder>
-                <button onClick={addLayer} className="w-full text-xs py-1.5 rounded mb-2 flex items-center justify-center gap-1" style={{ background: C.gold, color: C.chrome }}><Plus size={13} /> Tambah Layer</button>
-                <div className="flex flex-col gap-1.5">
-                  {displayLayers.map((layer) => (
-                    <LayerRow
-                      key={layer.id}
-                      layer={layer}
-                      active={layer.id === project.activeLayerId}
-                      onSelect={() => setActiveLayerId(layer.id)}
-                      onToggleVisible={() => toggleVisible(layer.id)}
-                      onToggleLock={() => toggleLock(layer.id)}
-                      onRename={(name) => renameLayer(layer.id, name)}
-                      onDuplicate={() => duplicateLayer(layer.id)}
-                      onDelete={() => removeLayer(layer.id)}
-                      onOpacity={(v) => setOpacity(layer.id, v)}
-                      onMoveUp={() => moveLayer(layer.id, 1)}
-                      onMoveDown={() => moveLayer(layer.id, -1)}
-                      onMerge={() => mergeDown(layer.id)}
-                      canDelete={project.layers.length > 1}
-                    />
-                  ))}
-                </div>
-              </Panel>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs" style={{ color: C.muted }}>Rotasi stempel</span>
+                    <button onClick={() => setNextStampRotation((r) => (r + 90) % 360)} className="flex items-center gap-1 text-xs px-2 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><RotateCw size={12} /> {nextStampRotation}°</button>
+                  </div>
+                </Panel>
 
-              {!panels.grid.open && !panels.color.open && !panels.stamp.open && !panels.layer.open && (
-                <p className="text-xs p-4 text-center" style={{ color: C.muted }}>Semua panel ditutup. Buka lagi lewat ikon di bar atas.</p>
-              )}
-            </div>
-          ) : (
-            <div className="w-11 flex flex-col items-center py-3 gap-1">
-              <PanelToggle title="Buka Panel Grid" active={panels.grid.open} onClick={() => openPanelPinned("grid")}><Grid3x3 size={16} /></PanelToggle>
-              <PanelToggle title="Buka Panel Warna" active={panels.color.open} onClick={() => openPanelPinned("color")}><Palette size={16} /></PanelToggle>
-              <PanelToggle title="Buka Panel Stempel" active={panels.stamp.open} onClick={() => openPanelPinned("stamp")}><Stamp size={16} /></PanelToggle>
-              <PanelToggle title="Buka Panel Layer" active={panels.layer.open} onClick={() => openPanelPinned("layer")}><LayersIcon size={16} /></PanelToggle>
+                <Panel title="Layer" icon={<LayersIcon size={14} />} open={panels.layer.open} collapsed={panels.layer.collapsed} onToggleCollapse={() => togglePanelCollapsed("layer")} onClose={() => closePanel("layer")} noBorder>
+                  <button onClick={addLayer} className="w-full text-xs py-1.5 rounded mb-2 flex items-center justify-center gap-1" style={{ background: C.gold, color: C.chrome }}><Plus size={13} /> Tambah Layer</button>
+                  <div className="flex flex-col gap-1.5">
+                    {displayLayers.map((layer) => (
+                      <LayerRow
+                        key={layer.id}
+                        layer={layer}
+                        active={layer.id === project.activeLayerId}
+                        onSelect={() => setActiveLayerId(layer.id)}
+                        onToggleVisible={() => toggleVisible(layer.id)}
+                        onToggleLock={() => toggleLock(layer.id)}
+                        onRename={(name) => renameLayer(layer.id, name)}
+                        onDuplicate={() => duplicateLayer(layer.id)}
+                        onDelete={() => removeLayer(layer.id)}
+                        onOpacity={(v) => setOpacity(layer.id, v)}
+                        onMoveUp={() => moveLayer(layer.id, 1)}
+                        onMoveDown={() => moveLayer(layer.id, -1)}
+                        onMerge={() => mergeDown(layer.id)}
+                        canDelete={project.layers.length > 1}
+                      />
+                    ))}
+                  </div>
+                </Panel>
+
+                {(!panels.grid.open && !panels.color.open && !panels.stamp.open && !panels.layer.open) && (
+                   <div className="px-4 py-8 text-center">
+                     <p className="text-[11px] text-[#C6AEE0]">Semua panel ditutup.</p>
+                     <p className="text-[11px] text-[#C6AEE0] mt-1">Buka dari ikon di bar sebelah kiri.</p>
+                   </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -1503,7 +1462,7 @@ function IconBtn({ children, title, onClick, disabled }) {
 }
 function PanelToggle({ children, title, active, onClick }) {
   return (
-    <button title={title} onClick={onClick} className="p-1.5 rounded" style={{ background: active ? C.goldSoft : "transparent", color: active ? C.gold : C.muted }}>
+    <button title={title} onClick={onClick} className="w-10 h-10 flex justify-center items-center rounded cursor-pointer" style={{ background: active ? C.goldSoft : "transparent", color: active ? C.gold : C.muted }}>
       {children}
     </button>
   );
@@ -1519,14 +1478,14 @@ function Panel({ title, icon, open, collapsed, onToggleCollapse, onClose, childr
   if (!open) return null;
   return (
     <div style={{ borderBottom: noBorder ? "none" : `1px solid ${C.line}` }}>
-      <div className="flex items-center justify-between px-4 py-2.5 cursor-pointer" onClick={onToggleCollapse}>
+      <div className="flex items-center justify-between px-4 py-2.5 cursor-pointer" onClick={onToggleCollapse} style={{ background: collapsed ? "transparent" : "rgba(0,0,0,0.15)" }}>
         <div className="flex items-center gap-1.5" style={{ color: C.muted }}>{icon}<span className="text-xs uppercase tracking-wide font-semibold">{title}</span></div>
         <div className="flex items-center gap-0.5">
           <button onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }} style={{ color: C.muted }} className="p-0.5">{collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}</button>
           <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: C.muted }} className="p-0.5" title="Tutup panel"><X size={14} /></button>
         </div>
       </div>
-      {!collapsed && <div className="px-4 pb-3.5">{children}</div>}
+      {!collapsed && <div className="px-4 pt-3 pb-4">{children}</div>}
     </div>
   );
 }

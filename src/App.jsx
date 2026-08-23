@@ -297,7 +297,7 @@ export default function SahabatKuApp() {
   const drawCanvasRef = useRef(null);
   const historyRef = useRef([deepClone(project)]);
   const historyIndexRef = useRef(0);
-  const isPinchingRef = useRef(false);
+  const activePointersRef = useRef(new Set());
 
   /* --------------------------- history --------------------------- */
   function pushHistory(nextProject) {
@@ -505,7 +505,18 @@ export default function SahabatKuApp() {
 
   /* --------------------------- pointer handlers --------------------------- */
   function handlePointerDown(e) {
-    if (isPinchingRef.current) return; // Tambahkan baris ini
+    activePointersRef.current.add(e.pointerId);
+
+    // JIKA ADA LEBIH DARI 1 JARI (PINCH), BATALKAN GORESAN YANG TIDAK SENGAJA TERCIPTA
+    if (activePointersRef.current.size > 1) {
+      if (draftRef.current) {
+        setProject(deepClone(historyRef.current[historyIndexRef.current]));
+        draftRef.current = null;
+      }
+      setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
+      return;
+    }
+
     e.preventDefault(); try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (!activeLayer || activeLayer.locked) return;
@@ -541,7 +552,9 @@ export default function SahabatKuApp() {
   }
 
 function handlePointerMove(e) {
-    if (isPinchingRef.current) return; // Tambahkan baris ini
+    // JANGAN MENGGAMBAR JIKA SEDANG PINCH ATAU SESI SUDAH DIBATALKAN
+    if (activePointersRef.current.size > 1 || (!draftRef.current && (isDrawing || movingSelection || draggingStamp))) return;
+
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
       const from = lastPaintRef.current || { gx, gy };
@@ -569,6 +582,14 @@ function handlePointerMove(e) {
   }
 
   function handlePointerUp(e) {
+    activePointersRef.current.delete(e.pointerId);
+
+    // JIKA SESI KOSONG (DIBATALKAN OLEH PINCH), HENTIKAN PROSES
+    if (!draftRef.current && (isDrawing || movingSelection || draggingStamp)) {
+      setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
+      try { canvasRef.current && canvasRef.current.releasePointerCapture(e.pointerId); } catch (_) {}
+      return;
+    }
     if (isPinchingRef.current) return; // Tambahkan proteksi ini
     if (e.touches && e.touches.length > 1) return;
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
@@ -591,45 +612,22 @@ function handlePointerMove(e) {
   /* --------------------------- gesture pinch to zoom --------------------------- */
   function getDistance(t1, t2) { return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
   function handleTouchStart(e) {
-    if (e.touches.length >= 2) { 
-      isPinchingRef.current = true;
+    if (e.touches.length === 2) { 
       pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]); 
       pinchStartZoomRef.current = zoom; 
-      
-      // Batalkan semua mode aktif
-      setIsDrawing(false); 
-      setMovingSelection(false); 
-      setDraggingStamp(false);
-      
-      // Kembalikan kanvas EXACTLY ke kondisi sebelum jari pertama menyentuh layar
-      if (historyRef.current[historyIndexRef.current]) {
-        setProject(deepClone(historyRef.current[historyIndexRef.current]));
-      }
-      
-      // Bersihkan semua referensi sementara agar tidak masuk ke History
-      draftRef.current = null;
-      lastPaintRef.current = null;
-      shapeStartRef.current = null;
-      shapeBaselineRef.current = null;
-      movingBlockRef.current = null;
-      moveBaselineRef.current = null;
     } 
-  }
   }
 
   function handleTouchMove(e) {
-    if (e.touches.length >= 2 && pinchStartDistRef.current) {
+    if (e.touches.length === 2 && pinchStartDistRef.current) {
       e.preventDefault(); e.stopPropagation();
       setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (getDistance(e.touches[0], e.touches[1]) / pinchStartDistRef.current))));
     }
   }
 
   function handleTouchEnd(e) { 
-    if (e.touches.length < 2) {
-      pinchStartDistRef.current = null;
-      // Beri jeda sedikit sebelum mematikan mode pinch agar pelepasan jari tidak terdeteksi sebagai klik
-      setTimeout(() => { isPinchingRef.current = false; }, 100); 
-    } 
+    if (e.touches.length < 2) pinchStartDistRef.current = null;
+    if (e.touches.length === 0) activePointersRef.current.clear(); // Safety net 
   }
   
   function handleWheel(e) { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.max(0.2, Math.min(5, z + (e.deltaY < 0 ? 0.1 : -0.1)))); } }

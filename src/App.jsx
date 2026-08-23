@@ -8,22 +8,30 @@ import {
 } from "lucide-react";
 import customLogo from "./logo.png";
 
-/* ---------------------------------- tokens --------------------------------- */
-const C = {
-  chrome: "#2C1B4D",
-  panel: "#3A2266",
-  panelAlt: "#462C7D",
-  line: "#5C3A94",
-  gold: "#FF70BF",
-  goldSoft: "rgba(255,112,191,0.16)",
-  teal: "#D552A3",
-  tealSoft: "rgba(213,82,163,0.22)",
-  text: "#F6EEFA",
-  muted: "#C6AEE0",
-  danger: "#FF6B6B",
+/* ---------------------------------- data ------------------------------------ */
+const APP_THEMES = {
+  "Sahabat Purple": {
+    chrome: "#2C1B4D", panel: "#3A2266", panelAlt: "#462C7D", line: "#5C3A94", 
+    gold: "#FF70BF", goldSoft: "rgba(255,112,191,0.16)", teal: "#D552A3", tealSoft: "rgba(213,82,163,0.22)", 
+    text: "#F6EEFA", muted: "#C6AEE0", danger: "#FF6B6B"
+  },
+  "Dark Classic": {
+    chrome: "#121212", panel: "#1E1E1E", panelAlt: "#2C2C2C", line: "#3D3D3D", 
+    gold: "#E3C16F", goldSoft: "rgba(227,193,111,0.16)", teal: "#6F9CE3", tealSoft: "rgba(111,156,227,0.22)", 
+    text: "#E0E0E0", muted: "#A0A0A0", danger: "#FF5252"
+  },
+  "Light Mode": {
+    chrome: "#F5F5F7", panel: "#FFFFFF", panelAlt: "#F0F0F0", line: "#E0E0E0", 
+    gold: "#007AFF", goldSoft: "rgba(0,122,255,0.12)", teal: "#34C759", tealSoft: "rgba(52,199,89,0.22)", 
+    text: "#1D1D1F", muted: "#86868B", danger: "#FF3B30"
+  },
+  "Kufi Green": {
+    chrome: "#0F2922", panel: "#153A30", panelAlt: "#1B4D40", line: "#2A6E5C", 
+    gold: "#F39C12", goldSoft: "rgba(243,156,18,0.16)", teal: "#1ABC9C", tealSoft: "rgba(26,188,156,0.22)", 
+    text: "#E8F5E9", muted: "#A5D6A7", danger: "#E74C3C"
+  }
 };
 
-/* ---------------------------------- data ------------------------------------ */
 const STAMP_SHAPES = {
   "allah": [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [0, 2], [1, 2], [2, 2], [4, 2], [6, 2], [2, 3], [4, 3], [6, 3], [0, 4], [1, 4], [2, 4], [4, 4], [6, 4], [0, 5], [2, 5], [4, 5], [6, 5], [0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6]],
   "muhammad": [[0, 0], [2, 0], [4, 0], [5, 0], [6, 0], [0, 1], [2, 1], [4, 1], [6, 1], [0, 2], [1, 2], [2, 2], [4, 2], [5, 2], [6, 2], [0, 3], [4, 3], [0, 4], [1, 4], [2, 4], [4, 4], [5, 4], [6, 4], [0, 5], [2, 5], [6, 5], [0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6]],
@@ -160,9 +168,9 @@ const PALETTES = {
   "Kufi Klasik": ["#1A1A1A", "#F4ECD8", "#C9A227", "#8B5E34"],
   "Gurun Pasir": ["#D2B48C", "#E3C16F", "#B8860B", "#8B4513", "#D9E3CC"],
   "Kufi Emas": ["#FFD700", "#DAA520", "#B8860B", "#F5DEB3", "#FFF8DC"],
-  "Peaceful Night": ["#000B18", "#0B1D3A", "#1D3A5F", "#407088", "#EAB543"],
+  "Malam Lailatul Qadar": ["#000B18", "#0B1D3A", "#1D3A5F", "#407088", "#EAB543"],
   "Senja Manado": ["#FF7E67", "#FF4C4C", "#C0392B", "#8E44AD", "#FAD390"],
-  "Black Coffee": ["#2C1E16", "#3E2723", "#4E342E", "#5D4037", "#D7CCC8"],
+  "Kopi Hitam": ["#2C1E16", "#3E2723", "#4E342E", "#5D4037", "#D7CCC8"],
   "Monokrom": ["#000000", "#404040", "#808080", "#BFBFBF", "#FFFFFF"],
   "Pastel Sakura": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
   "Neon Cyber": ["#FCEE09", "#00FFF5", "#FF007F", "#111111", "#7B00FF"],
@@ -173,7 +181,6 @@ const PALETTES = {
   "Desert": ["#C1666B", "#E3A857", "#F4D35E", "#EE964B", "#6B4226"],
   "Lavender": ["#6C5CE7", "#A29BFE", "#C8B6FF", "#E2D9F3", "#F8F7FF"],
   "Mint": ["#004D40", "#00796B", "#26A69A", "#80CBC4", "#E0F2F1"],
-  "Coffee": ["#3E2723", "#5D4037", "#795548", "#A1887F", "#D7CCC8"],
   "Cherry": ["#5C001E", "#8B0000", "#C9184A", "#FF4D6D", "#FFCCD5"],
   "Golden": ["#3D2B00", "#8C6A00", "#C9A227", "#E5C76B", "#FFF3B0"],
   "Arctic": ["#023047", "#219EBC", "#8ECAE6", "#CAF0F8", "#F8FDFF"],
@@ -184,7 +191,6 @@ const GRID_PRESETS = [
   { label: "32×32", cols: 32, rows: 32 },
   { label: "64×64", cols: 64, rows: 64 },
 ];
-
 const ZOOM_STEPS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5];
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
@@ -193,6 +199,10 @@ function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
 
 /* --------------------------------- component --------------------------------- */
 export default function SahabatKuApp() {
+  // STATE: Tema UI
+  const [appThemeName, setAppThemeName] = useState("Sahabat Purple");
+  const C = APP_THEMES[appThemeName] || APP_THEMES["Sahabat Purple"];
+
   const [gridCols, setGridCols] = useState(32);
   const [gridRows, setGridRows] = useState(32);
   const [showGrid, setShowGrid] = useState(true);
@@ -207,8 +217,8 @@ export default function SahabatKuApp() {
 
   const [activeTool, setActiveTool] = useState("pencil");
   const [rectFilled, setRectFilled] = useState(false);
-  const [activeColor, setActiveColor] = useState("#FF70BF");
-  const [pickerColor, setPickerColor] = useState("#FF70BF");
+  const [activeColor, setActiveColor] = useState(C.gold);
+  const [pickerColor, setPickerColor] = useState(C.gold);
   const [customPalette, setCustomPalette] = useState([]);
   const [recentColors, setRecentColors] = useState([]);
   const [activePaletteName, setActivePaletteName] = useState("Sahabat Purple");
@@ -226,8 +236,6 @@ export default function SahabatKuApp() {
   const [csvText, setCsvText] = useState("");
   const [csvName, setCsvName] = useState("");
   const [showCsvForm, setShowCsvForm] = useState(false);
-  
-  // Kategori Stempel (Default Tertutup)
   const [stampCats, setStampCats] = useState({ kufi: false, huruf: false, custom: false });
 
   const stampLibrary = [...ALL_BUILTIN, ...customCsvStamps, ...customImageStamps];
@@ -260,23 +268,14 @@ export default function SahabatKuApp() {
 
   const pinchStartDistRef = useRef(null);
   const pinchStartZoomRef = useRef(null);
-  
-  // Untuk warna custom (color picker)
-  const colorPickerRef = useRef(null);
 
-  function togglePanelCollapsed(key) {
-    setPanels((p) => ({ ...p, [key]: { ...p[key], collapsed: !p[key].collapsed } }));
-  }
-  function toggleSidebar() {
-    setSidebarExpanded(!sidebarExpanded);
-  }
+  function togglePanelCollapsed(key) { setPanels((p) => ({ ...p, [key]: { ...p[key], collapsed: !p[key].collapsed } })); }
+  function toggleSidebar() { setSidebarExpanded(!sidebarExpanded); }
   function openPanel(key) {
     if(!sidebarExpanded) setSidebarExpanded(true);
     setPanels((p) => ({ ...p, [key]: { open: true, collapsed: false } }));
   }
-  function closePanel(key) {
-    setPanels((p) => ({ ...p, [key]: { ...p[key], open: false } }));
-  }
+  function closePanel(key) { setPanels((p) => ({ ...p, [key]: { ...p[key], open: false } })); }
 
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -309,9 +308,7 @@ export default function SahabatKuApp() {
     if (historyIndexRef.current <= 0) return;
     historyIndexRef.current -= 1;
     setProject(deepClone(historyRef.current[historyIndexRef.current]));
-    setSelection(null);
-    setSelectedStampId(null);
-    forceTick((t) => t + 1);
+    setSelection(null); setSelectedStampId(null); forceTick((t) => t + 1);
   }
   function redo() {
     if (historyIndexRef.current >= historyRef.current.length - 1) return;
@@ -329,76 +326,46 @@ export default function SahabatKuApp() {
 
   function addRecentColor(color) { setRecentColors((prev) => [color, ...prev.filter((c) => c !== color)].slice(0, 8)); }
   function pickColor(color) {
-    setActiveColor(color);
-    addRecentColor(color);
+    setActiveColor(color); addRecentColor(color);
     if (selectedStampId) updateStampColor(selectedStampId, color);
   }
-  function getCellPx() {
-    const base = Math.max(6, Math.min(28, Math.floor(500 / Math.max(gridCols, gridRows))));
-    return base * zoom;
-  }
+  function getCellPx() { return Math.max(6, Math.min(28, Math.floor(500 / Math.max(gridCols, gridRows)))) * zoom; }
   function getGridCoords(e) {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const cellPx = getCellPx();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    const canvas = canvasRef.current, rect = canvas.getBoundingClientRect();
+    const cellPx = getCellPx(), scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
     const clientX = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
     const clientY = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
-    const x = (clientX - rect.left) * scaleX;
-    const y = (clientY - rect.top) * scaleY;
-    let gx = Math.floor(x / cellPx);
-    let gy = Math.floor(y / cellPx);
-    gx = Math.max(0, Math.min(gridCols - 1, gx));
-    gy = Math.max(0, Math.min(gridRows - 1, gy));
-    return { gx, gy };
+    const x = (clientX - rect.left) * scaleX, y = (clientY - rect.top) * scaleY;
+    return { gx: Math.max(0, Math.min(gridCols - 1, Math.floor(x / cellPx))), gy: Math.max(0, Math.min(gridRows - 1, Math.floor(y / cellPx))) };
   }
 
   /* --------------------------- canvas render --------------------------- */
   const drawCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const cellPx = getCellPx();
-    canvas.width = gridCols * cellPx;
-    canvas.height = gridRows * cellPx;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#F4F2EC";
+    const canvas = canvasRef.current; if (!canvas) return;
+    const cellPx = getCellPx(); canvas.width = gridCols * cellPx; canvas.height = gridRows * cellPx;
+    const ctx = canvas.getContext("2d"); ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Background
+    ctx.fillStyle = C.chrome === "#121212" ? "#1A1A1A" : "#F4F2EC";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (showAltShading) {
-      ctx.fillStyle = "rgba(90,50,140,0.09)";
-      for (let y = 0; y < gridRows; y++) {
-        for (let x = 0; x < gridCols; x++) {
-          if (x % 2 === 1 && y % 2 === 1) ctx.fillRect(x * cellPx, y * cellPx, cellPx, cellPx);
-        }
-      }
+      ctx.fillStyle = C.chrome === "#121212" ? "rgba(255,255,255,0.03)" : "rgba(90,50,140,0.09)";
+      for (let y = 0; y < gridRows; y++) for (let x = 0; x < gridCols; x++) if (x % 2 === 1 && y % 2 === 1) ctx.fillRect(x * cellPx, y * cellPx, cellPx, cellPx);
     }
 
     project.layers.forEach((layer) => {
-      if (!layer.visible) return;
-      ctx.globalAlpha = layer.opacity;
-      Object.entries(layer.cells).forEach(([key, color]) => {
-        const [x, y] = key.split(",").map(Number);
-        ctx.fillStyle = color;
-        ctx.fillRect(x * cellPx, y * cellPx, cellPx, cellPx);
-      });
-      layer.stamps.forEach((st) => {
-        drawStampOnCtx(ctx, st, cellPx, imageCacheRef, () => drawCanvasRef.current && drawCanvasRef.current());
-      });
+      if (!layer.visible) return; ctx.globalAlpha = layer.opacity;
+      Object.entries(layer.cells).forEach(([key, color]) => { const [x, y] = key.split(",").map(Number); ctx.fillStyle = color; ctx.fillRect(x * cellPx, y * cellPx, cellPx, cellPx); });
+      layer.stamps.forEach((st) => drawStampOnCtx(ctx, st, cellPx, imageCacheRef, () => drawCanvasRef.current && drawCanvasRef.current()));
     });
     ctx.globalAlpha = 1;
 
     if (showGrid) {
-      ctx.strokeStyle = "rgba(20,20,30,0.38)";
+      ctx.strokeStyle = C.chrome === "#121212" ? "rgba(255,255,255,0.1)" : "rgba(20,20,30,0.38)";
       ctx.lineWidth = 1;
-      for (let x = 0; x <= gridCols; x++) {
-        ctx.beginPath(); ctx.moveTo(x * cellPx + 0.5, 0); ctx.lineTo(x * cellPx + 0.5, gridRows * cellPx); ctx.stroke();
-      }
-      for (let y = 0; y <= gridRows; y++) {
-        ctx.beginPath(); ctx.moveTo(0, y * cellPx + 0.5); ctx.lineTo(gridCols * cellPx, y * cellPx + 0.5); ctx.stroke();
-      }
+      for (let x = 0; x <= gridCols; x++) { ctx.beginPath(); ctx.moveTo(x * cellPx + 0.5, 0); ctx.lineTo(x * cellPx + 0.5, gridRows * cellPx); ctx.stroke(); }
+      for (let y = 0; y <= gridRows; y++) { ctx.beginPath(); ctx.moveTo(0, y * cellPx + 0.5); ctx.lineTo(gridCols * cellPx, y * cellPx + 0.5); ctx.stroke(); }
     }
 
     if (selection) {
@@ -408,26 +375,18 @@ export default function SahabatKuApp() {
       ctx.strokeStyle = C.teal; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.strokeRect(sx * cellPx + 1, sy * cellPx + 1, (ex - sx + 1) * cellPx - 2, (ey - sy + 1) * cellPx - 2); ctx.setLineDash([]);
     }
     if (selectedStampId) {
-      const layer = project.layers.find((l) => l.id === project.activeLayerId);
-      const st = layer && layer.stamps.find((s) => s.id === selectedStampId);
-      if (st) {
-        const { w, h } = getEffectiveFootprint(st);
-        ctx.strokeStyle = C.gold; ctx.lineWidth = 2; ctx.strokeRect(st.gx * cellPx + 1, st.gy * cellPx + 1, w * cellPx - 2, h * cellPx - 2);
-      }
+      const st = project.layers.find((l) => l.id === project.activeLayerId)?.stamps.find((s) => s.id === selectedStampId);
+      if (st) { const { w, h } = getEffectiveFootprint(st); ctx.strokeStyle = C.gold; ctx.lineWidth = 2; ctx.strokeRect(st.gx * cellPx + 1, st.gy * cellPx + 1, w * cellPx - 2, h * cellPx - 2); }
     }
 
     if (activeTool === "stamp" && hoverCell && !draggingStamp && !isDrawing) {
-      const steps = rotSteps(nextStampRotation);
-      const { w: effW, h: effH } = rotatedDims(nextFootprintW, nextFootprintH, steps);
-      const ggx = Math.max(0, Math.min(hoverCell.gx, Math.max(0, gridCols - effW)));
-      const ggy = Math.max(0, Math.min(hoverCell.gy, Math.max(0, gridRows - effH)));
-      const ghost = chosenStamp.kind === "image"
-          ? { type: "image", imageSrc: chosenStamp.dataUrl, gx: ggx, gy: ggy, rotation: nextStampRotation, footprintW: nextFootprintW, footprintH: nextFootprintH }
-          : { type: "cells", cells: chosenStamp.cells, patternW: chosenStamp.w, patternH: chosenStamp.h, gx: ggx, gy: ggy, rotation: nextStampRotation, footprintW: nextFootprintW, footprintH: nextFootprintH, color: activeColor };
+      const { w: effW, h: effH } = rotatedDims(nextFootprintW, nextFootprintH, rotSteps(nextStampRotation));
+      const ggx = Math.max(0, Math.min(hoverCell.gx, Math.max(0, gridCols - effW))), ggy = Math.max(0, Math.min(hoverCell.gy, Math.max(0, gridRows - effH)));
+      const ghost = chosenStamp.kind === "image" ? { type: "image", imageSrc: chosenStamp.dataUrl, gx: ggx, gy: ggy, rotation: nextStampRotation, footprintW: nextFootprintW, footprintH: nextFootprintH } : { type: "cells", cells: chosenStamp.cells, patternW: chosenStamp.w, patternH: chosenStamp.h, gx: ggx, gy: ggy, rotation: nextStampRotation, footprintW: nextFootprintW, footprintH: nextFootprintH, color: activeColor };
       drawStampOnCtx(ctx, ghost, cellPx, imageCacheRef, undefined, 0.4);
       ctx.strokeStyle = C.gold; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]); ctx.strokeRect(ggx * cellPx + 1, ggy * cellPx + 1, effW * cellPx - 2, effH * cellPx - 2); ctx.setLineDash([]);
     }
-  }, [project, gridCols, gridRows, showGrid, showAltShading, zoom, selection, selectedStampId, activeTool, hoverCell, chosenStamp, nextStampRotation, nextFootprintW, nextFootprintH, activeColor, draggingStamp, isDrawing]);
+  }, [project, gridCols, gridRows, showGrid, showAltShading, zoom, selection, selectedStampId, activeTool, hoverCell, chosenStamp, nextStampRotation, nextFootprintW, nextFootprintH, activeColor, draggingStamp, isDrawing, C]);
 
   useEffect(() => { drawCanvasRef.current = drawCanvas; }, [drawCanvas]);
   useEffect(() => { drawCanvas(); }, [drawCanvas]);
@@ -435,93 +394,57 @@ export default function SahabatKuApp() {
   /* --------------------------- pixel-cell painting --------------------------- */
   function beginStroke() { draftRef.current = deepClone(project); }
   function bresenhamLine(x0, y0, x1, y1) {
-    const points = []; let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
-    let sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    const points = []; let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0); let sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
     let err = dx - dy, x = x0, y = y0;
-    while (true) {
-      points.push([x, y]); if (x === x1 && y === y1) break;
-      const e2 = 2 * err; if (e2 > -dy) { err -= dy; x += sx; } if (e2 < dx) { err += dx; y += sy; }
-    }
+    while (true) { points.push([x, y]); if (x === x1 && y === y1) break; const e2 = 2 * err; if (e2 > -dy) { err -= dy; x += sx; } if (e2 < dx) { err += dx; y += sy; } }
     return points;
   }
   function paintLineLive(from, to, color) {
-    const next = draftRef.current;
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    bresenhamLine(from.gx, from.gy, to.gx, to.gy).forEach(([x, y]) => {
-      const key = `${x},${y}`;
-      if (color === null) delete layer.cells[key]; else layer.cells[key] = color;
-    });
+    const next = draftRef.current, layer = next.layers.find((l) => l.id === next.activeLayerId);
+    bresenhamLine(from.gx, from.gy, to.gx, to.gy).forEach(([x, y]) => { if (color === null) delete layer.cells[`${x},${y}`]; else layer.cells[`${x},${y}`] = color; });
     setProject({ ...next });
   }
   function eraseLineLive(from, to) {
-    const next = draftRef.current;
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    const pts = bresenhamLine(from.gx, from.gy, to.gx, to.gy);
+    const next = draftRef.current, layer = next.layers.find((l) => l.id === next.activeLayerId), pts = bresenhamLine(from.gx, from.gy, to.gx, to.gy);
     pts.forEach(([x, y]) => delete layer.cells[`${x},${y}`]);
-    layer.stamps = layer.stamps.filter((st) => {
-      const { w, h } = getEffectiveFootprint(st);
-      return !pts.some(([x, y]) => x >= st.gx && x <= st.gx + w - 1 && y >= st.gy && y <= st.gy + h - 1);
-    });
+    layer.stamps = layer.stamps.filter((st) => !pts.some(([x, y]) => x >= st.gx && x <= st.gx + getEffectiveFootprint(st).w - 1 && y >= st.gy && y <= st.gy + getEffectiveFootprint(st).h - 1));
     setProject({ ...next });
   }
   function bucketFill(gx, gy, fillColor) {
-    const next = deepClone(project);
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    const target = layer.cells[`${gx},${gy}`] ?? null;
+    const next = deepClone(project), layer = next.layers.find((l) => l.id === next.activeLayerId), target = layer.cells[`${gx},${gy}`] ?? null;
     if (target === fillColor) return;
-    const stack = [[gx, gy]]; const visited = new Set();
+    const stack = [[gx, gy]], visited = new Set();
     while (stack.length) {
-      const [x, y] = stack.pop();
-      if (x < 0 || y < 0 || x >= gridCols || y >= gridRows) continue;
-      const key = `${x},${y}`;
-      if (visited.has(key)) continue; visited.add(key);
-      const cur = layer.cells[key] ?? null;
-      if (cur !== target) continue;
-      layer.cells[key] = fillColor;
-      stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+      const [x, y] = stack.pop(); if (x < 0 || y < 0 || x >= gridCols || y >= gridRows) continue;
+      const key = `${x},${y}`; if (visited.has(key)) continue; visited.add(key);
+      if ((layer.cells[key] ?? null) !== target) continue;
+      layer.cells[key] = fillColor; stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
     }
     commit(next); addRecentColor(fillColor);
   }
 
   /* --------------------------- selection --------------------------- */
   function updateMovePreview(newX0, newY0) {
-    const next = deepClone(moveBaselineRef.current);
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    Object.entries(movingBlockRef.current).forEach(([relKey, color]) => {
-      const [rx, ry] = relKey.split(",").map(Number);
-      layer.cells[`${newX0 + rx},${newY0 + ry}`] = color;
-    });
-    setProject(next); draftRef.current = next;
-    const { w, h } = moveDimRef.current;
-    setSelection({ x0: newX0, y0: newY0, x1: newX0 + w - 1, y1: newY0 + h - 1 });
+    const next = deepClone(moveBaselineRef.current), layer = next.layers.find((l) => l.id === next.activeLayerId);
+    Object.entries(movingBlockRef.current).forEach(([relKey, color]) => { const [rx, ry] = relKey.split(",").map(Number); layer.cells[`${newX0 + rx},${newY0 + ry}`] = color; });
+    setProject(next); draftRef.current = next; setSelection({ x0: newX0, y0: newY0, x1: newX0 + moveDimRef.current.w - 1, y1: newY0 + moveDimRef.current.h - 1 });
   }
   function rotateSelection() {
     if (!selection || !activeLayer) return;
-    const next = deepClone(project);
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
+    const next = deepClone(project), layer = next.layers.find((l) => l.id === next.activeLayerId);
     const x0 = Math.min(selection.x0, selection.x1), y0 = Math.min(selection.y0, selection.y1);
-    const x1 = Math.max(selection.x0, selection.x1), y1 = Math.max(selection.y0, selection.y1);
-    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    const w = Math.max(selection.x0, selection.x1) - x0 + 1, h = Math.max(selection.y0, selection.y1) - y0 + 1;
     const nx0 = Math.min(x0, Math.max(0, gridCols - h)), ny0 = Math.min(y0, Math.max(0, gridRows - w));
     const oldBlock = {};
-    for (let x = x0; x <= x1; x++)
-      for (let y = y0; y <= y1; y++) {
-        const k = `${x},${y}`;
-        if (layer.cells[k] !== undefined) { oldBlock[`${x - x0},${y - y0}`] = layer.cells[k]; delete layer.cells[k]; }
-      }
-    Object.entries(oldBlock).forEach(([relKey, color]) => {
-      const [lx, ly] = relKey.split(",").map(Number);
-      layer.cells[`${nx0 + (h - 1 - ly)},${ny0 + lx}`] = color;
-    });
+    for (let x = x0; x < x0 + w; x++) for (let y = y0; y < y0 + h; y++) { const k = `${x},${y}`; if (layer.cells[k] !== undefined) { oldBlock[`${x - x0},${y - y0}`] = layer.cells[k]; delete layer.cells[k]; } }
+    Object.entries(oldBlock).forEach(([relKey, color]) => { const [lx, ly] = relKey.split(",").map(Number); layer.cells[`${nx0 + (h - 1 - ly)},${ny0 + lx}`] = color; });
     commit(next); setSelection({ x0: nx0, y0: ny0, x1: nx0 + h - 1, y1: ny0 + w - 1 });
   }
   function deleteSelection() {
     if (!selection) return;
-    const next = deepClone(project);
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
+    const next = deepClone(project), layer = next.layers.find((l) => l.id === next.activeLayerId);
     const x0 = Math.min(selection.x0, selection.x1), y0 = Math.min(selection.y0, selection.y1);
-    const x1 = Math.max(selection.x0, selection.x1), y1 = Math.max(selection.y0, selection.y1);
-    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) delete layer.cells[`${x},${y}`];
+    for (let x = x0; x <= Math.max(selection.x0, selection.x1); x++) for (let y = y0; y <= Math.max(selection.y0, selection.y1); y++) delete layer.cells[`${x},${y}`];
     commit(next); setSelection(null);
   }
 
@@ -529,47 +452,32 @@ export default function SahabatKuApp() {
   function placeStamp(gx, gy) {
     if (!activeLayer || activeLayer.locked || !chosenStamp) return;
     const footprintW = Math.max(1, nextFootprintW), footprintH = Math.max(1, nextFootprintH);
-    const steps = rotSteps(nextStampRotation);
-    const { w: effW, h: effH } = rotatedDims(footprintW, footprintH, steps);
-    const cgx = Math.max(0, Math.min(gx, Math.max(0, gridCols - effW)));
-    const cgy = Math.max(0, Math.min(gy, Math.max(0, gridRows - effH)));
-    const stamp = chosenStamp.kind === "image"
-        ? { id: uid(), type: "image", imageSrc: chosenStamp.dataUrl, gx: cgx, gy: cgy, rotation: nextStampRotation, footprintW, footprintH }
-        : { id: uid(), type: "cells", cells: chosenStamp.cells, patternW: chosenStamp.w, patternH: chosenStamp.h, gx: cgx, gy: cgy, rotation: nextStampRotation, footprintW, footprintH, color: activeColor };
-    const next = deepClone(project);
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    layer.stamps.push(stamp);
-    commit(next);
-    if (stamp.type === "cells") addRecentColor(activeColor);
-    setSelectedStampId(stamp.id);
+    const { w: effW, h: effH } = rotatedDims(footprintW, footprintH, rotSteps(nextStampRotation));
+    const cgx = Math.max(0, Math.min(gx, Math.max(0, gridCols - effW))), cgy = Math.max(0, Math.min(gy, Math.max(0, gridRows - effH)));
+    const stamp = chosenStamp.kind === "image" ? { id: uid(), type: "image", imageSrc: chosenStamp.dataUrl, gx: cgx, gy: cgy, rotation: nextStampRotation, footprintW, footprintH } : { id: uid(), type: "cells", cells: chosenStamp.cells, patternW: chosenStamp.w, patternH: chosenStamp.h, gx: cgx, gy: cgy, rotation: nextStampRotation, footprintW, footprintH, color: activeColor };
+    const next = deepClone(project); next.layers.find((l) => l.id === next.activeLayerId).stamps.push(stamp);
+    commit(next); if (stamp.type === "cells") addRecentColor(activeColor); setSelectedStampId(stamp.id);
   }
   function findStampAt(gx, gy) {
     if (!activeLayer) return null;
     for (let i = activeLayer.stamps.length - 1; i >= 0; i--) {
-      const st = activeLayer.stamps[i];
-      const { w, h } = getEffectiveFootprint(st);
+      const st = activeLayer.stamps[i], { w, h } = getEffectiveFootprint(st);
       if (gx >= st.gx && gx <= st.gx + w - 1 && gy >= st.gy && gy <= st.gy + h - 1) return st;
     }
     return null;
   }
   function rotateSelectedStamp() {
     if (!selectedStampId) return;
-    const next = deepClone(project);
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    const st = layer.stamps.find((s) => s.id === selectedStampId);
+    const next = deepClone(project), st = next.layers.find((l) => l.id === next.activeLayerId).stamps.find((s) => s.id === selectedStampId);
     if (!st) return; st.rotation = (st.rotation + 90) % 360; commit(next);
   }
   function deleteSelectedStamp() {
     if (!selectedStampId) return;
-    const next = deepClone(project);
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    layer.stamps = layer.stamps.filter((s) => s.id !== selectedStampId);
-    commit(next); setSelectedStampId(null);
+    const next = deepClone(project), layer = next.layers.find((l) => l.id === next.activeLayerId);
+    layer.stamps = layer.stamps.filter((s) => s.id !== selectedStampId); commit(next); setSelectedStampId(null);
   }
   function updateStampColor(id, color) {
-    const next = deepClone(project);
-    const layer = next.layers.find((l) => l.id === next.activeLayerId);
-    const st = layer.stamps.find((s) => s.id === id);
+    const next = deepClone(project), st = next.layers.find((l) => l.id === next.activeLayerId).stamps.find((s) => s.id === id);
     if (!st || st.type === "image") return; st.color = color; commit(next);
   }
   function handleUploadStamp(e) {
@@ -578,7 +486,7 @@ export default function SahabatKuApp() {
     reader.onload = (ev) => {
       const entry = { id: uid(), kind: "image", name: file.name.replace(/\.[^.]+$/, ""), label: file.name.replace(/\.[^.]+$/, ""), dataUrl: ev.target.result };
       setCustomImageStamps((prev) => [...prev, entry]); setStampChoiceId(entry.id); setActiveTool("stamp");
-      setStampCats(c => ({...c, custom: true})); // Buka tab custom otomatis
+      setStampCats(c => ({...c, custom: true}));
     };
     reader.readAsDataURL(file); e.target.value = "";
   }
@@ -587,8 +495,7 @@ export default function SahabatKuApp() {
     if (!parsed || parsed.cells.length === 0) return window.alert(`Format CSV tidak valid.`);
     const entry = { id: uid(), kind: "cells", w: parsed.w, h: parsed.h, cells: parsed.cells, label: csvName.trim() || "Stempel CSV" };
     setCustomCsvStamps((prev) => [...prev, entry]); setStampChoiceId(entry.id); setActiveTool("stamp");
-    setCsvText(""); setCsvName(""); setShowCsvForm(false);
-    setStampCats(c => ({...c, custom: true}));
+    setCsvText(""); setCsvName(""); setShowCsvForm(false); setStampCats(c => ({...c, custom: true}));
   }
   function rotateActive() { if (selection) rotateSelection(); else if (selectedStampId) rotateSelectedStamp(); }
   function deleteActive() { if (selection) deleteSelection(); else if (selectedStampId) deleteSelectedStamp(); }
@@ -596,8 +503,7 @@ export default function SahabatKuApp() {
   /* --------------------------- pointer handlers --------------------------- */
   function handlePointerDown(e) {
     if (e.touches && e.touches.length > 1) return;
-    e.preventDefault();
-    try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
+    e.preventDefault(); try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (!activeLayer || activeLayer.locked) return;
 
@@ -616,25 +522,18 @@ export default function SahabatKuApp() {
       const stampHit = findStampAt(gx, gy);
       if (stampHit) {
         setSelection(null); setSelectedStampId(stampHit.id); beginStroke();
-        stampDragAnchorRef.current = { gx, gy }; stampOrigRef.current = { gx: stampHit.gx, gy: stampHit.gy };
-        setDraggingStamp(true); return;
+        stampDragAnchorRef.current = { gx, gy }; stampOrigRef.current = { gx: stampHit.gx, gy: stampHit.gy }; setDraggingStamp(true); return;
       }
       setSelectedStampId(null);
-      if (selection && gx >= Math.min(selection.x0, selection.x1) && gx <= Math.max(selection.x0, selection.x1) &&
-          gy >= Math.min(selection.y0, selection.y1) && gy <= Math.max(selection.y0, selection.y1)) {
+      if (selection && gx >= Math.min(selection.x0, selection.x1) && gx <= Math.max(selection.x0, selection.x1) && gy >= Math.min(selection.y0, selection.y1) && gy <= Math.max(selection.y0, selection.y1)) {
         const x0 = Math.min(selection.x0, selection.x1), y0 = Math.min(selection.y0, selection.y1);
         const w = Math.max(selection.x0, selection.x1) - x0 + 1, h = Math.max(selection.y0, selection.y1) - y0 + 1;
         beginStroke();
         const next = draftRef.current, layer = next.layers.find((l) => l.id === next.activeLayerId), block = {};
-        for (let x = x0; x < x0 + w; x++) for (let y = y0; y < y0 + h; y++) {
-          const k = `${x},${y}`; if (layer.cells[k] !== undefined) { block[`${x - x0},${y - y0}`] = layer.cells[k]; delete layer.cells[k]; }
-        }
-        movingBlockRef.current = block; moveBaselineRef.current = deepClone(next);
-        moveAnchorRef.current = { x0, y0 }; moveDimRef.current = { w, h }; moveStartGridRef.current = { gx, gy };
+        for (let x = x0; x < x0 + w; x++) for (let y = y0; y < y0 + h; y++) { const k = `${x},${y}`; if (layer.cells[k] !== undefined) { block[`${x - x0},${y - y0}`] = layer.cells[k]; delete layer.cells[k]; } }
+        movingBlockRef.current = block; moveBaselineRef.current = deepClone(next); moveAnchorRef.current = { x0, y0 }; moveDimRef.current = { w, h }; moveStartGridRef.current = { gx, gy };
         setProject({ ...next }); setMovingSelection(true);
-      } else {
-        setIsDrawing(true); setSelection({ x0: gx, y0: gy, x1: gx, y1: gy });
-      }
+      } else { setIsDrawing(true); setSelection({ x0: gx, y0: gy, x1: gx, y1: gy }); }
     }
   }
 
@@ -646,29 +545,21 @@ export default function SahabatKuApp() {
       if (activeTool === "eraser") eraseLineLive(from, { gx, gy }); else paintLineLive(from, { gx, gy }, activeColor);
       lastPaintRef.current = { gx, gy };
     } else if (isDrawing && (activeTool === "line" || activeTool === "rect") && shapeStartRef.current) {
-      const next = deepClone(shapeBaselineRef.current), layer = next.layers.find((l) => l.id === next.activeLayerId);
-      const { gx: sx, gy: sy } = shapeStartRef.current;
+      const next = deepClone(shapeBaselineRef.current), layer = next.layers.find((l) => l.id === next.activeLayerId), { gx: sx, gy: sy } = shapeStartRef.current;
       if (activeTool === "line") { bresenhamLine(sx, sy, gx, gy).forEach(([x, y]) => { layer.cells[`${x},${y}`] = activeColor; }); }
       else {
         const x0 = Math.min(sx, gx), x1 = Math.max(sx, gx), y0 = Math.min(sy, gy), y1 = Math.max(sy, gy);
-        for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) {
-          if (rectFilled || x === x0 || x === x1 || y === y0 || y === y1) layer.cells[`${x},${y}`] = activeColor;
-        }
+        for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) if (rectFilled || x === x0 || x === x1 || y === y0 || y === y1) layer.cells[`${x},${y}`] = activeColor;
       }
       setProject(next); draftRef.current = next;
-    } else if (isDrawing && activeTool === "select") {
-      setSelection((sel) => (sel ? { ...sel, x1: gx, y1: gy } : sel));
+    } else if (isDrawing && activeTool === "select") { setSelection((sel) => (sel ? { ...sel, x1: gx, y1: gy } : sel));
     } else if (movingSelection && moveStartGridRef.current) {
-      const { w, h } = moveDimRef.current;
-      const newX0 = Math.max(0, Math.min(gridCols - w, moveAnchorRef.current.x0 + (gx - moveStartGridRef.current.gx)));
-      const newY0 = Math.max(0, Math.min(gridRows - h, moveAnchorRef.current.y0 + (gy - moveStartGridRef.current.gy)));
-      updateMovePreview(newX0, newY0);
+      updateMovePreview(Math.max(0, Math.min(gridCols - moveDimRef.current.w, moveAnchorRef.current.x0 + (gx - moveStartGridRef.current.gx))), Math.max(0, Math.min(gridRows - moveDimRef.current.h, moveAnchorRef.current.y0 + (gy - moveStartGridRef.current.gy))));
     } else if (draggingStamp && selectedStampId && stampDragAnchorRef.current) {
       const next = draftRef.current, st = next.layers.find((l) => l.id === next.activeLayerId).stamps.find((s) => s.id === selectedStampId);
       if (st) {
         const { w, h } = getEffectiveFootprint(st);
-        st.gx = Math.max(0, Math.min(Math.max(0, gridCols - w), stampOrigRef.current.gx + (gx - stampDragAnchorRef.current.gx)));
-        st.gy = Math.max(0, Math.min(Math.max(0, gridRows - h), stampOrigRef.current.gy + (gy - stampDragAnchorRef.current.gy)));
+        st.gx = Math.max(0, Math.min(Math.max(0, gridCols - w), stampOrigRef.current.gx + (gx - stampDragAnchorRef.current.gx))); st.gy = Math.max(0, Math.min(Math.max(0, gridRows - h), stampOrigRef.current.gy + (gy - stampDragAnchorRef.current.gy)));
         setProject({ ...next });
       }
     }
@@ -677,9 +568,7 @@ export default function SahabatKuApp() {
   function handlePointerUp(e) {
     if (e.touches && e.touches.length > 1) return;
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
-      if (activeTool === "eraser" && selectedStampId && draftRef.current) {
-        if (!draftRef.current.layers.find((l) => l.id === draftRef.current.activeLayerId)?.stamps.find((s) => s.id === selectedStampId)) setSelectedStampId(null);
-      }
+      if (activeTool === "eraser" && selectedStampId && draftRef.current) { if (!draftRef.current.layers.find((l) => l.id === draftRef.current.activeLayerId)?.stamps.find((s) => s.id === selectedStampId)) setSelectedStampId(null); }
       pushHistory(draftRef.current); draftRef.current = null; lastPaintRef.current = null;
     } else if (isDrawing && (activeTool === "line" || activeTool === "rect")) {
       pushHistory(draftRef.current); addRecentColor(activeColor); draftRef.current = null; shapeBaselineRef.current = null; shapeStartRef.current = null;
@@ -702,21 +591,14 @@ export default function SahabatKuApp() {
   }
   function handleTouchMove(e) {
     if (e.touches.length === 2 && pinchStartDistRef.current) {
-      e.preventDefault(); 
-      e.stopPropagation(); // Mencegah geser layar default browser
-      const newZoom = pinchStartZoomRef.current * (getDistance(e.touches[0], e.touches[1]) / pinchStartDistRef.current);
-      setZoom(Math.max(0.2, Math.min(5, newZoom)));
+      e.preventDefault(); e.stopPropagation();
+      setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (getDistance(e.touches[0], e.touches[1]) / pinchStartDistRef.current))));
     }
   }
   function handleTouchEnd(e) { if (e.touches.length < 2) pinchStartDistRef.current = null; }
   
-  function handleWheel(e) {
-    if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.max(0.2, Math.min(5, z + (e.deltaY < 0 ? 0.1 : -0.1)))); }
-  }
-  useEffect(() => {
-    const stage = document.getElementById("canvas-stage");
-    if(stage) { stage.addEventListener('wheel', handleWheel, {passive: false}); return () => stage.removeEventListener('wheel', handleWheel); }
-  }, []);
+  function handleWheel(e) { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.max(0.2, Math.min(5, z + (e.deltaY < 0 ? 0.1 : -0.1)))); } }
+  useEffect(() => { const stage = document.getElementById("canvas-stage"); if(stage) { stage.addEventListener('wheel', handleWheel, {passive: false}); return () => stage.removeEventListener('wheel', handleWheel); } }, []);
   useEffect(() => {
     function onKey(e) {
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
@@ -732,10 +614,7 @@ export default function SahabatKuApp() {
     const next = deepClone(project);
     next.layers.forEach((layer) => {
       const newCells = {};
-      for (let ny = 0; ny < newRows; ny++) for (let nx = 0; nx < newCols; nx++) {
-          const c = layer.cells[`${Math.floor((nx * gridCols) / newCols)},${Math.floor((ny * gridRows) / newRows)}`];
-          if (c) newCells[`${nx},${ny}`] = c;
-        }
+      for (let ny = 0; ny < newRows; ny++) for (let nx = 0; nx < newCols; nx++) { const c = layer.cells[`${Math.floor((nx * gridCols) / newCols)},${Math.floor((ny * gridRows) / newRows)}`]; if (c) newCells[`${nx},${ny}`] = c; }
       layer.cells = newCells;
     });
     commit(next); setGridCols(newCols); setGridRows(newRows); setCustomW(newCols); setCustomH(newRows); setGridSizeLabel(label || `${newCols}×${newRows}`);
@@ -809,36 +688,38 @@ export default function SahabatKuApp() {
         @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Inter:wght@400;500;600;700&display=swap');
         input[type=range]{ accent-color: ${C.gold}; }
         input[type=color]{ opacity: 0; position: absolute; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer; }
-        ::-webkit-scrollbar{ width:4px; height:4px; }
+        ::-webkit-scrollbar{ width:6px; height:6px; }
         ::-webkit-scrollbar-thumb{ background:${C.line}; border-radius:4px; }
+        ::-webkit-scrollbar-track{ background: transparent; }
         .touch-action-none { touch-action: none !important; }
       `}</style>
 
       {/* ---------- top bar ---------- */}
       <div className="flex items-center px-4 h-14 shrink-0 border-b relative" style={{ background: C.panel, borderColor: C.line }}>
         
-        {/* LOGO DIKUNCI DI KIRI */}
+        {/* LOGO & NAMA APLIKASI */}
         <div className="flex items-center gap-2 mr-3 shrink-0 z-10 sticky left-0" style={{ background: C.panel }}>
           <img src={customLogo} alt="SahabatKu Logo" style={{ height: "32px", width: "auto", objectFit: "contain" }} className="shrink-0" />
+          <span className="font-bold text-sm tracking-wide hidden md:inline ml-1" style={{ color: C.text }}>SAKU: Sahabat Kufi</span>
         </div>
         
-        {/* MENU */}
+        {/* MENU UTAMA */}
         <div className="flex items-center gap-1.5 overflow-x-auto overflow-y-hidden flex-1 pb-1">
           <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
-          <IconBtn title="Baru" onClick={newCanvas}><FilePlus2 size={16} /></IconBtn>
-          <IconBtn title="Simpan (.saku)" onClick={saveProject}><Save size={16} /></IconBtn>
-          <IconBtn title="Buka file .saku" onClick={() => fileInputRef.current.click()}><FolderOpen size={16} /></IconBtn>
+          <IconBtn C={C} title="Baru" onClick={newCanvas}><FilePlus2 size={16} /></IconBtn>
+          <IconBtn C={C} title="Simpan (.saku)" onClick={saveProject}><Save size={16} /></IconBtn>
+          <IconBtn C={C} title="Buka file .saku" onClick={() => fileInputRef.current.click()}><FolderOpen size={16} /></IconBtn>
           <input ref={fileInputRef} type="file" accept=".saku,.json" className="hidden" onChange={handleOpenFile} />
           
           <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
-          <IconBtn title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}><Undo2 size={16} /></IconBtn>
-          <IconBtn title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={redo}><Redo2 size={16} /></IconBtn>
+          <IconBtn C={C} title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}><Undo2 size={16} /></IconBtn>
+          <IconBtn C={C} title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={redo}><Redo2 size={16} /></IconBtn>
           
           <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
           <div className="flex items-center shrink-0">
-              <IconBtn title="Perkecil" onClick={() => zoomStep(-1)}><ZoomOut size={16} /></IconBtn>
+              <IconBtn C={C} title="Perkecil" onClick={() => zoomStep(-1)}><ZoomOut size={16} /></IconBtn>
               <span className="text-[11px] w-8 text-center" style={{ color: C.muted }}>{Math.round(zoom * 100)}%</span>
-              <IconBtn title="Perbesar" onClick={() => zoomStep(1)}><ZoomIn size={16} /></IconBtn>
+              <IconBtn C={C} title="Perbesar" onClick={() => zoomStep(1)}><ZoomIn size={16} /></IconBtn>
           </div>
           
           <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
@@ -856,9 +737,9 @@ export default function SahabatKuApp() {
                  <option value="8">8x</option>
                  <option value="16">16x</option>
               </select>
-              <IconBtn title="Export PNG" onClick={exportPNG}><ImageIcon size={16} /></IconBtn>
-              <IconBtn title="Export SVG" onClick={exportSVG}><FileText size={16} /></IconBtn>
-              <IconBtn title="Export PDF" onClick={exportPDF}><Printer size={16} /></IconBtn>
+              <IconBtn C={C} title="Export PNG" onClick={exportPNG}><ImageIcon size={16} /></IconBtn>
+              <IconBtn C={C} title="Export SVG" onClick={exportSVG}><FileText size={16} /></IconBtn>
+              <IconBtn C={C} title="Export PDF" onClick={exportPDF}><Printer size={16} /></IconBtn>
           </div>
         </div>
       </div>
@@ -867,30 +748,30 @@ export default function SahabatKuApp() {
       <div className="flex flex-1 min-h-0 relative overflow-hidden">
         
         {/* left toolbar */}
-        <div className="w-12 md:w-14 shrink-0 border-r flex flex-col items-center py-2 md:py-3 gap-1 z-20" style={{ background: C.panel, borderColor: C.line }}>
-          <ToolBtn active={activeTool === "pencil"} title="Pensil" onClick={() => setActiveTool("pencil")}><Pencil size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "eraser"} title="Penghapus" onClick={() => setActiveTool("eraser")}><Eraser size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "select"} title="Pilih" onClick={() => setActiveTool("select")}><MousePointer2 size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "bucket"} title="Bucket" onClick={() => setActiveTool("bucket")}><PaintBucket size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "line"} title="Garis" onClick={() => setActiveTool("line")}><Slash size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "rect"} title="Kotak" onClick={() => setActiveTool("rect")}><Square size={18} /></ToolBtn>
+        <div className="w-12 md:w-14 shrink-0 border-r flex flex-col items-center py-2 md:py-3 gap-1 z-20 transition-colors" style={{ background: C.panel, borderColor: C.line }}>
+          <ToolBtn C={C} active={activeTool === "pencil"} title="Pensil" onClick={() => setActiveTool("pencil")}><Pencil size={18} /></ToolBtn>
+          <ToolBtn C={C} active={activeTool === "eraser"} title="Penghapus" onClick={() => setActiveTool("eraser")}><Eraser size={18} /></ToolBtn>
+          <ToolBtn C={C} active={activeTool === "select"} title="Pilih" onClick={() => setActiveTool("select")}><MousePointer2 size={18} /></ToolBtn>
+          <ToolBtn C={C} active={activeTool === "bucket"} title="Bucket" onClick={() => setActiveTool("bucket")}><PaintBucket size={18} /></ToolBtn>
+          <ToolBtn C={C} active={activeTool === "line"} title="Garis" onClick={() => setActiveTool("line")}><Slash size={18} /></ToolBtn>
+          <ToolBtn C={C} active={activeTool === "rect"} title="Kotak" onClick={() => setActiveTool("rect")}><Square size={18} /></ToolBtn>
           <div className="w-6 md:w-8 h-px my-1" style={{ background: C.line }} />
-          <ToolBtn title="Rotasi" disabled={!hasActiveObject} onClick={rotateActive}><RotateCw size={18} /></ToolBtn>
-          <ToolBtn active={activeTool === "stamp"} title="Stempel" onClick={() => setActiveTool("stamp")}><Stamp size={18} /></ToolBtn>
+          <ToolBtn C={C} title="Rotasi" disabled={!hasActiveObject} onClick={rotateActive}><RotateCw size={18} /></ToolBtn>
+          <ToolBtn C={C} active={activeTool === "stamp"} title="Stempel" onClick={() => setActiveTool("stamp")}><Stamp size={18} /></ToolBtn>
         </div>
 
         {/* canvas stage */}
-        <div id="canvas-stage" className="flex-1 min-w-0 flex flex-col items-center justify-center relative overflow-hidden" style={{ background: "#12151A" }}>
+        <div id="canvas-stage" className="flex-1 min-w-0 flex flex-col items-center justify-center relative overflow-hidden" style={{ background: C.chrome === "#121212" ? "#0A0A0A" : "#12151A" }}>
           {hasActiveObject ? (
             <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-              <span className="text-[10px] md:text-xs" style={{ color: C.muted }}>{selection ? "Seleksi aktif" : "Stempel terpilih"}</span>
+              <span className="text-[10px] md:text-xs" style={{ color: C.text }}>{selection ? "Seleksi aktif" : "Stempel terpilih"}</span>
               <button className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: C.goldSoft, color: C.gold }} onClick={rotateActive}><RotateCw size={13} /> Rotasi</button>
               <button className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: "rgba(209,73,91,0.15)", color: C.danger }} onClick={deleteActive}><Trash2 size={13} /> Hapus</button>
               <button className="p-1 rounded" style={{ color: C.muted }} onClick={() => { setSelection(null); setSelectedStampId(null); }}><X size={14} /></button>
             </div>
           ) : activeTool === "rect" ? (
             <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-              <span className="text-[10px] md:text-xs" style={{ color: C.muted }}>Kotak</span>
+              <span className="text-[10px] md:text-xs" style={{ color: C.text }}>Kotak</span>
               <button onClick={() => setRectFilled((f) => !f)} className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: rectFilled ? C.goldSoft : "transparent", color: rectFilled ? C.gold : C.text, border: `1px solid ${C.line}` }}>
                 <Square size={13} /> {rectFilled ? "Terisi" : "Garis Tepi"}
               </button>
@@ -911,37 +792,50 @@ export default function SahabatKuApp() {
         </div>
 
         {/* Right Sidebar Area */}
-        <div className={`absolute top-0 right-0 h-full bg-[#3A2266] z-30 transition-transform duration-300 flex border-l md:relative shadow-2xl md:shadow-none`} 
-             style={{ borderColor: C.line, transform: sidebarExpanded ? 'translateX(0)' : 'translateX(100%)' }}>
+        <div className={`absolute top-0 right-0 h-full z-30 transition-transform duration-300 flex border-l md:relative shadow-2xl md:shadow-none`} 
+             style={{ background: C.panel, borderColor: C.line, transform: sidebarExpanded ? 'translateX(0)' : 'translateX(100%)' }}>
           
           {/* Toggle Panel Button */}
           <div 
              onClick={toggleSidebar}
-             className="absolute top-1/2 -left-6 md:-left-5 -translate-y-1/2 w-6 md:w-5 h-16 md:h-12 flex items-center justify-center cursor-pointer rounded-l-md shadow-[0_0_10px_rgba(0,0,0,0.5)] md:shadow-md bg-[#462C7D]" 
-             style={{ border: `1px solid ${C.line}`, borderRight: "none" }}
+             className="absolute top-1/2 -left-6 md:-left-5 -translate-y-1/2 w-6 md:w-5 h-16 md:h-12 flex items-center justify-center cursor-pointer rounded-l-md shadow-[0_0_10px_rgba(0,0,0,0.5)] md:shadow-md" 
+             style={{ background: C.panelAlt, border: `1px solid ${C.line}`, borderRight: "none" }}
              title={sidebarExpanded ? "Tutup Panel" : "Buka Panel"}
           >
             {sidebarExpanded ? <ChevronRight size={18} color={C.gold} /> : <ChevronLeft size={18} color={C.gold} />}
           </div>
 
           {!sidebarExpanded && (
-            <div className="w-12 h-full hidden md:flex flex-col items-center py-4 gap-3 bg-[#3A2266] absolute right-[100%] border-l" style={{ borderColor: C.line }}>
-              <PanelToggle title="Buka Panel Grid" onClick={() => openPanel("grid")}><Grid3x3 size={18} /></PanelToggle>
-              <PanelToggle title="Buka Panel Warna" onClick={() => openPanel("color")}><Palette size={18} /></PanelToggle>
-              <PanelToggle title="Buka Panel Stempel" onClick={() => openPanel("stamp")}><Stamp size={18} /></PanelToggle>
-              <PanelToggle title="Buka Panel Layer" onClick={() => openPanel("layer")}><LayersIcon size={18} /></PanelToggle>
+            <div className="w-12 h-full hidden md:flex flex-col items-center py-4 gap-3 absolute right-[100%] border-l" style={{ background: C.panel, borderColor: C.line }}>
+              <PanelToggle C={C} title="Buka Panel Grid" onClick={() => openPanel("grid")}><Grid3x3 size={18} /></PanelToggle>
+              <PanelToggle C={C} title="Buka Panel Warna" onClick={() => openPanel("color")}><Palette size={18} /></PanelToggle>
+              <PanelToggle C={C} title="Buka Panel Stempel" onClick={() => openPanel("stamp")}><Stamp size={18} /></PanelToggle>
+              <PanelToggle C={C} title="Buka Panel Layer" onClick={() => openPanel("layer")}><LayersIcon size={18} /></PanelToggle>
             </div>
           )}
 
           {/* Expanded State: Full Panels */}
-          <div className="w-64 md:w-72 h-full flex flex-col bg-[#3A2266]">
+          <div className="w-64 md:w-72 h-full flex flex-col" style={{ background: C.panel }}>
             <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: C.line }}>
-              <span className="text-sm font-semibold text-[#F6EEFA]">Panel Kontrol</span>
+              <span className="text-sm font-semibold" style={{ color: C.text }}>Panel Kontrol</span>
             </div>
             
             <div className="flex-1 overflow-y-auto">
+              
+              {/* PANEL TEMA (BARU) */}
+              <Panel C={C} title="Tema Aplikasi" icon={<Palette size={14} />} open={true} collapsed={true} onToggleCollapse={() => {}} onClose={() => {}} noCloseIcon>
+                 <select 
+                    value={appThemeName} 
+                    onChange={(e) => setAppThemeName(e.target.value)} 
+                    className="w-full text-[11px] md:text-xs px-2 py-1.5 rounded" 
+                    style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}
+                 >
+                    {Object.keys(APP_THEMES).map((name) => (<option key={name} value={name}>{name}</option>))}
+                 </select>
+              </Panel>
+
               {/* GRID */}
-              <Panel title="Kanvas & Grid" icon={<Grid3x3 size={14} />} open={panels.grid.open} collapsed={panels.grid.collapsed} onToggleCollapse={() => togglePanelCollapsed("grid")} onClose={() => closePanel("grid")}>
+              <Panel C={C} title="Kanvas & Grid" icon={<Grid3x3 size={14} />} open={panels.grid.open} collapsed={panels.grid.collapsed} onToggleCollapse={() => togglePanelCollapsed("grid")} onClose={() => closePanel("grid")}>
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {GRID_PRESETS.map((p) => (
                     <button key={p.label} onClick={() => applyGridSize(p.cols, p.rows, p.label)} className="text-xs px-2 py-1 rounded border" style={{ borderColor: gridSizeLabel === p.label ? C.gold : C.line, color: gridSizeLabel === p.label ? C.gold : C.text }}>{p.label}</button>
@@ -953,47 +847,47 @@ export default function SahabatKuApp() {
                     <input type="number" min={4} max={128} value={customW} onChange={(e) => setCustomW(Number(e.target.value))} className="w-12 text-xs px-1 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
                     <span className="text-xs" style={{ color: C.muted }}>×</span>
                     <input type="number" min={4} max={128} value={customH} onChange={(e) => setCustomH(Number(e.target.value))} className="w-12 text-xs px-1 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }} />
-                    <button onClick={() => applyGridSize(customW, customH, "custom")} className="text-[10px] px-2 py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Set</button>
+                    <button onClick={() => applyGridSize(customW, customH, "custom")} className="text-[10px] px-2 py-1 rounded font-bold" style={{ background: C.gold, color: C.chrome }}>Set</button>
                   </div>
                 )}
-                <ToggleRow label="Tampilkan Grid" checked={showGrid} onChange={setShowGrid} />
-                <ToggleRow label="Grid Alternatif" checked={showAltShading} onChange={setShowAltShading} />
+                <ToggleRow C={C} label="Tampilkan Grid" checked={showGrid} onChange={setShowGrid} />
+                <ToggleRow C={C} label="Grid Alternatif" checked={showAltShading} onChange={setShowAltShading} />
               </Panel>
 
               {/* WARNA */}
-              <Panel title="Warna" icon={<Palette size={14} />} open={panels.color.open} collapsed={panels.color.collapsed} onToggleCollapse={() => togglePanelCollapsed("color")} onClose={() => closePanel("color")}>
+              <Panel C={C} title="Warna" icon={<Palette size={14} />} open={panels.color.open} collapsed={panels.color.collapsed} onToggleCollapse={() => togglePanelCollapsed("color")} onClose={() => closePanel("color")}>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded border-2" style={{ background: activeColor, borderColor: C.line }} />
+                  <div className="w-8 h-8 rounded border-2 shadow-sm" style={{ background: activeColor, borderColor: C.line }} />
                   
                   {/* COLOR PICKER ICON */}
-                  <div className="relative w-8 h-8 rounded flex items-center justify-center cursor-pointer overflow-hidden group" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }} title="Pilih Warna">
-                    <Pipette size={14} className="text-[#C6AEE0] group-hover:text-white" />
+                  <div className="relative w-8 h-8 rounded flex items-center justify-center cursor-pointer overflow-hidden transition-colors hover:opacity-80" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }} title="Pilih Warna Kustom">
+                    <Pipette size={14} color={C.muted} />
                     <input type="color" value={pickerColor} onChange={(e) => { setPickerColor(e.target.value); pickColor(e.target.value); }} />
                   </div>
                   
-                  <button onClick={() => setCustomPalette((prev) => (prev.includes(pickerColor) ? prev : [...prev, pickerColor].slice(-16)))} className="text-[10px] px-2 py-1 rounded flex items-center gap-1 ml-auto" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><Plus size={12} /> Palet</button>
+                  <button onClick={() => setCustomPalette((prev) => (prev.includes(pickerColor) ? prev : [...prev, pickerColor].slice(-16)))} className="text-[10px] px-2 py-1.5 rounded flex items-center gap-1 ml-auto font-medium" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}><Plus size={12} /> Ke Palet</button>
                 </div>
                 <select value={activePaletteName} onChange={(e) => setActivePaletteName(e.target.value)} className="w-full text-[11px] md:text-xs px-2 py-1.5 rounded mb-2" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}>
                   {Object.keys(PALETTES).map((name) => (<option key={name} value={name}>{name}</option>))}
                 </select>
-                <div className="flex flex-wrap gap-1.5 mb-3">{PALETTES[activePaletteName].map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div>
-                {customPalette.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>Custom</p><div className="flex flex-wrap gap-1.5 mb-3">{customPalette.map((c) => (<Swatch key={c} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
-                {recentColors.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>History</p><div className="flex flex-wrap gap-1.5">{recentColors.map((c, i) => (<Swatch key={c + i} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
+                <div className="flex flex-wrap gap-1.5 mb-3">{PALETTES[activePaletteName].map((c) => (<Swatch key={c} C={C} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div>
+                {customPalette.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>Palet Kustom</p><div className="flex flex-wrap gap-1.5 mb-3">{customPalette.map((c) => (<Swatch key={c} C={C} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
+                {recentColors.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>Riwayat</p><div className="flex flex-wrap gap-1.5">{recentColors.map((c, i) => (<Swatch key={c + i} C={C} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
               </Panel>
 
               {/* STEMPEL */}
-              <Panel title="Stempel" icon={<Stamp size={14} />} open={panels.stamp.open} collapsed={panels.stamp.collapsed} onToggleCollapse={() => togglePanelCollapsed("stamp")} onClose={() => closePanel("stamp")}>
+              <Panel C={C} title="Stempel" icon={<Stamp size={14} />} open={panels.stamp.open} collapsed={panels.stamp.collapsed} onToggleCollapse={() => togglePanelCollapsed("stamp")} onClose={() => closePanel("stamp")}>
                 
                 {/* Accordion Kufi Stamp */}
                 <div className="mb-2 border rounded overflow-hidden" style={{ borderColor: C.line }}>
-                  <button onClick={() => setStampCats(c => ({...c, kufi: !c.kufi}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px] bg-[#3A2266] hover:bg-[#462C7D]">
-                    <span>Kufi Stamp</span>
+                  <button onClick={() => setStampCats(c => ({...c, kufi: !c.kufi}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px]" style={{ background: stampCats.kufi ? C.panelAlt : 'transparent', color: C.text }}>
+                    <span className="font-medium">Kufi Stamp</span>
                     {stampCats.kufi ? <ChevronDown size={12}/> : <ChevronUp size={12}/>}
                   </button>
                   {stampCats.kufi && (
-                    <div className="p-2 bg-[#2C1B4D] grid grid-cols-4 md:grid-cols-3 gap-1.5">
+                    <div className="p-2 grid grid-cols-4 md:grid-cols-3 gap-1.5" style={{ background: C.chrome }}>
                       {BUILTIN_STAMPS_KUFI.map((s) => (
-                        <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+                        <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center transition-colors hover:opacity-80" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
                           <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
                         </button>
                       ))}
@@ -1003,14 +897,14 @@ export default function SahabatKuApp() {
 
                 {/* Accordion Huruf Kufi */}
                 <div className="mb-2 border rounded overflow-hidden" style={{ borderColor: C.line }}>
-                  <button onClick={() => setStampCats(c => ({...c, huruf: !c.huruf}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px] bg-[#3A2266] hover:bg-[#462C7D]">
-                    <span>Huruf Kufi</span>
+                  <button onClick={() => setStampCats(c => ({...c, huruf: !c.huruf}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px]" style={{ background: stampCats.huruf ? C.panelAlt : 'transparent', color: C.text }}>
+                    <span className="font-medium">Huruf Kufi</span>
                     {stampCats.huruf ? <ChevronDown size={12}/> : <ChevronUp size={12}/>}
                   </button>
                   {stampCats.huruf && (
-                    <div className="p-2 bg-[#2C1B4D] grid grid-cols-4 md:grid-cols-3 gap-1.5">
+                    <div className="p-2 grid grid-cols-4 md:grid-cols-3 gap-1.5" style={{ background: C.chrome }}>
                       {BUILTIN_STAMPS_HURUF.map((s) => (
-                        <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+                        <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center transition-colors hover:opacity-80" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
                           <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
                         </button>
                       ))}
@@ -1020,43 +914,43 @@ export default function SahabatKuApp() {
 
                 {/* Accordion Custom */}
                 <div className="mb-3 border rounded overflow-hidden" style={{ borderColor: C.line }}>
-                  <button onClick={() => setStampCats(c => ({...c, custom: !c.custom}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px] bg-[#3A2266] hover:bg-[#462C7D]">
-                    <span>Custom</span>
+                  <button onClick={() => setStampCats(c => ({...c, custom: !c.custom}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px]" style={{ background: stampCats.custom ? C.panelAlt : 'transparent', color: C.text }}>
+                    <span className="font-medium">Custom</span>
                     {stampCats.custom ? <ChevronDown size={12}/> : <ChevronUp size={12}/>}
                   </button>
                   {stampCats.custom && (
-                    <div className="p-2 bg-[#2C1B4D]">
+                    <div className="p-2" style={{ background: C.chrome }}>
                       <div className="flex items-center justify-between mb-1.5">
                         <p className="text-[10px]" style={{ color: C.muted }}>Stempel Anda</p>
-                        <button onClick={() => setShowCsvForm((s) => !s)} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>{showCsvForm ? "Tutup" : "+ CSV"}</button>
+                        <button onClick={() => setShowCsvForm((s) => !s)} className="text-[10px] px-1.5 py-0.5 rounded transition-colors" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}>{showCsvForm ? "Tutup" : "+ CSV"}</button>
                       </div>
                       
                       {showCsvForm && (
                         <div className="mb-2 p-1.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
                           <input value={csvName} onChange={(e) => setCsvName(e.target.value)} placeholder="Nama (mis. Alif)" className="w-full text-[10px] px-1.5 py-1 rounded mb-1" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
                           <textarea value={csvText} onChange={(e) => setCsvText(e.target.value)} placeholder={"000;010;000"} rows={2} className="w-full text-[10px] font-mono px-1.5 py-1 rounded mb-1" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
-                          <button onClick={handleAddCsvStamp} className="w-full text-[10px] py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Tambah CSV</button>
+                          <button onClick={handleAddCsvStamp} className="w-full text-[10px] py-1 rounded font-bold" style={{ background: C.gold, color: C.chrome }}>Tambah CSV</button>
                         </div>
                       )}
 
                       <div className="grid grid-cols-4 md:grid-cols-3 gap-1.5">
                         {customCsvStamps.map((s) => (
-                          <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+                          <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center transition-colors hover:opacity-80" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
                             <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
                           </button>
                         ))}
                         {customImageStamps.map((cs) => (
-                          <button key={cs.id} title={cs.label} onClick={() => { setStampChoiceId(cs.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center overflow-hidden" style={{ borderColor: stampChoiceId === cs.id ? C.gold : C.line, background: C.panelAlt }}>
+                          <button key={cs.id} title={cs.label} onClick={() => { setStampChoiceId(cs.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center overflow-hidden transition-colors hover:opacity-80" style={{ borderColor: stampChoiceId === cs.id ? C.gold : C.line, background: C.panelAlt }}>
                             <img src={cs.dataUrl} alt={cs.label} className="w-full h-full object-contain" />
                           </button>
                         ))}
-                        <button onClick={() => stampUploadRef.current.click()} className="aspect-square rounded border border-dashed flex items-center justify-center" style={{ borderColor: C.line, color: C.muted }} title="Unggah Gambar">
+                        <button onClick={() => stampUploadRef.current.click()} className="aspect-square rounded border border-dashed flex items-center justify-center transition-colors hover:opacity-80" style={{ borderColor: C.line, color: C.muted }} title="Unggah Gambar">
                           <Upload size={14} />
                         </button>
                         <input ref={stampUploadRef} type="file" accept="image/*" className="hidden" onChange={handleUploadStamp} />
                       </div>
                       {(customCsvStamps.length === 0 && customImageStamps.length === 0) && (
-                         <p className="text-[10px] text-center mt-2 opacity-50">Belum ada stempel custom</p>
+                         <p className="text-[9px] text-center mt-2 opacity-50" style={{ color: C.muted }}>Belum ada stempel custom</p>
                       )}
                     </div>
                   )}
@@ -1067,7 +961,7 @@ export default function SahabatKuApp() {
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px]" style={{ color: C.muted }}>Ukuran (Sel)</span>
                     {chosenStamp.kind === "cells" && (
-                      <button onClick={() => { setNextFootprintW(chosenStamp.w); setNextFootprintH(chosenStamp.h); }} className="text-[9px] px-1 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>Asli ({chosenStamp.w}×{chosenStamp.h})</button>
+                      <button onClick={() => { setNextFootprintW(chosenStamp.w); setNextFootprintH(chosenStamp.h); }} className="text-[9px] px-1 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}>Asli ({chosenStamp.w}×{chosenStamp.h})</button>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -1079,17 +973,17 @@ export default function SahabatKuApp() {
 
                 <div className="flex items-center justify-between">
                   <span className="text-[10px]" style={{ color: C.muted }}>Rotasi</span>
-                  <button onClick={() => setNextStampRotation((r) => (r + 90) % 360)} className="flex items-center gap-1 text-[11px] px-2 py-1 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><RotateCw size={10} /> {nextStampRotation}°</button>
+                  <button onClick={() => setNextStampRotation((r) => (r + 90) % 360)} className="flex items-center gap-1 text-[11px] px-2 py-1 rounded transition-colors" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}><RotateCw size={10} /> {nextStampRotation}°</button>
                 </div>
               </Panel>
 
               {/* LAYER */}
-              <Panel title="Layer" icon={<LayersIcon size={14} />} open={panels.layer.open} collapsed={panels.layer.collapsed} onToggleCollapse={() => togglePanelCollapsed("layer")} onClose={() => closePanel("layer")} noBorder>
-                <button onClick={addLayer} className="w-full text-xs py-1.5 rounded mb-2 flex items-center justify-center gap-1" style={{ background: C.gold, color: C.chrome }}><Plus size={13} /> Tambah Layer</button>
+              <Panel C={C} title="Layer" icon={<LayersIcon size={14} />} open={panels.layer.open} collapsed={panels.layer.collapsed} onToggleCollapse={() => togglePanelCollapsed("layer")} onClose={() => closePanel("layer")} noBorder>
+                <button onClick={addLayer} className="w-full text-xs py-1.5 rounded mb-2 flex items-center justify-center gap-1 font-bold" style={{ background: C.gold, color: C.chrome }}><Plus size={13} /> Tambah Layer</button>
                 <div className="flex flex-col gap-1.5">
                   {displayLayers.map((layer) => (
                     <LayerRow
-                      key={layer.id} layer={layer} active={layer.id === project.activeLayerId}
+                      key={layer.id} layer={layer} active={layer.id === project.activeLayerId} C={C}
                       onSelect={() => setActiveLayerId(layer.id)} onToggleVisible={() => toggleVisible(layer.id)}
                       onToggleLock={() => toggleLock(layer.id)} onRename={(name) => renameLayer(layer.id, name)}
                       onDuplicate={() => duplicateLayer(layer.id)} onDelete={() => removeLayer(layer.id)}
@@ -1103,11 +997,22 @@ export default function SahabatKuApp() {
 
               {(!panels.grid.open && !panels.color.open && !panels.stamp.open && !panels.layer.open) && (
                  <div className="px-4 py-8 text-center">
-                   <p className="text-[10px] text-[#C6AEE0]">Semua panel ditutup.</p>
-                   <p className="text-[10px] text-[#C6AEE0] mt-1 hidden md:block">Buka dari ikon di bar sebelah kiri.</p>
+                   <p className="text-[10px]" style={{ color: C.muted }}>Semua panel ditutup.</p>
+                   <p className="text-[10px] mt-1 hidden md:block" style={{ color: C.muted }}>Buka dari ikon di bar sebelah kiri.</p>
                    <button onClick={() => { openPanel("grid"); openPanel("color"); openPanel("stamp"); openPanel("layer"); }} className="mt-3 text-[10px] border px-2 py-1 rounded" style={{ borderColor: C.line, color: C.text }}>Tampilkan Semua</button>
                  </div>
               )}
+            </div>
+
+            {/* CREDITS FOOTER DI BAWAH SIDEBAR */}
+            <div className="p-3 text-center border-t shrink-0 opacity-70" style={{ borderColor: C.line, background: C.panel }}>
+                <p className="text-[9px] mb-0.5 font-medium" style={{ color: C.muted }}>
+                  SAKU: Sahabat Kufi
+                </p>
+                <p className="text-[8px] leading-tight" style={{ color: C.muted }}>
+                  Created by @syarifkufi and @sahabat.sekufi<br/>
+                  &copy; 2026
+                </p>
             </div>
           </div>
         </div>
@@ -1117,53 +1022,53 @@ export default function SahabatKuApp() {
 }
 
 /* ------------------------------ small components ------------------------------ */
-function IconBtn({ children, title, onClick, disabled }) {
+function IconBtn({ C, children, title, onClick, disabled }) {
   return (
-    <button title={title} onClick={onClick} disabled={disabled} className="p-1 md:p-1.5 rounded" style={{ color: disabled ? "#4A5361" : C.text, opacity: disabled ? 0.5 : 1 }}
+    <button title={title} onClick={onClick} disabled={disabled} className="p-1 md:p-1.5 rounded transition-colors" style={{ color: disabled ? C.muted : C.text, opacity: disabled ? 0.3 : 1 }}
       onMouseEnter={(e) => !disabled && (e.currentTarget.style.background = C.panelAlt)} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
       {children}
     </button>
   );
 }
-function PanelToggle({ children, title, onClick }) {
+function PanelToggle({ C, children, title, onClick }) {
   return (
-    <button title={title} onClick={onClick} className="w-8 h-8 flex justify-center items-center rounded cursor-pointer text-[#C6AEE0] hover:bg-[#462C7D]">
+    <button title={title} onClick={onClick} className="w-8 h-8 flex justify-center items-center rounded cursor-pointer transition-colors" style={{ color: C.muted }} onMouseEnter={(e) => (e.currentTarget.style.background = C.panelAlt)} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
       {children}
     </button>
   );
 }
-function ToolBtn({ children, title, active, disabled, onClick }) {
+function ToolBtn({ C, children, title, active, disabled, onClick }) {
   return (
-    <button title={title} onClick={onClick} disabled={disabled} className="w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center" style={{ background: active ? C.goldSoft : "transparent", color: disabled ? "#4A5361" : active ? C.gold : C.muted, opacity: disabled ? 0.5 : 1 }}>
+    <button title={title} onClick={onClick} disabled={disabled} className="w-8 h-8 md:w-10 md:h-10 rounded flex items-center justify-center transition-colors" style={{ background: active ? C.goldSoft : "transparent", color: disabled ? C.muted : active ? C.gold : C.muted, opacity: disabled ? 0.3 : 1 }} onMouseEnter={(e) => !active && !disabled && (e.currentTarget.style.background = C.panelAlt)} onMouseLeave={(e) => !active && (e.currentTarget.style.background = "transparent")}>
       {children}
     </button>
   );
 }
-function Panel({ title, icon, open, collapsed, onToggleCollapse, onClose, children, noBorder }) {
+function Panel({ C, title, icon, open, collapsed, onToggleCollapse, onClose, children, noBorder, noCloseIcon }) {
   if (!open) return null;
   return (
     <div style={{ borderBottom: noBorder ? "none" : `1px solid ${C.line}` }}>
-      <div className="flex items-center justify-between px-3 py-2 cursor-pointer" onClick={onToggleCollapse} style={{ background: collapsed ? "transparent" : "rgba(0,0,0,0.15)" }}>
-        <div className="flex items-center gap-1.5" style={{ color: C.muted }}>{icon}<span className="text-[10px] md:text-xs uppercase tracking-wide font-semibold">{title}</span></div>
+      <div className="flex items-center justify-between px-3 py-2.5 cursor-pointer transition-colors hover:opacity-80" onClick={onToggleCollapse} style={{ background: collapsed ? "transparent" : "rgba(0,0,0,0.2)" }}>
+        <div className="flex items-center gap-1.5" style={{ color: C.muted }}>{icon}<span className="text-[10px] md:text-xs uppercase tracking-wider font-semibold" style={{ color: C.text }}>{title}</span></div>
         <div className="flex items-center gap-0.5">
           <button onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }} style={{ color: C.muted }} className="p-0.5">{collapsed ? <ChevronDown size={12} /> : <ChevronUp size={12} />}</button>
-          <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: C.muted }} className="p-0.5"><X size={12} /></button>
+          {!noCloseIcon && <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: C.muted }} className="p-0.5"><X size={12} /></button>}
         </div>
       </div>
       {!collapsed && <div className="px-3 pt-2 pb-3">{children}</div>}
     </div>
   );
 }
-function ToggleRow({ label, checked, onChange }) {
+function ToggleRow({ C, label, checked, onChange }) {
   return (
-    <label className="flex items-center justify-between py-1 cursor-pointer">
+    <label className="flex items-center justify-between py-1.5 cursor-pointer hover:opacity-80 transition-opacity">
       <span className="text-[11px]" style={{ color: C.text }}>{label}</span>
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="scale-90" />
     </label>
   );
 }
-function Swatch({ color, active, onClick }) {
-  return <button onClick={onClick} className="w-5 h-5 md:w-6 md:h-6 rounded" style={{ background: color, border: active ? `2px solid ${C.gold}` : `1px solid ${C.line}`, boxShadow: active ? "0 0 0 1px rgba(0,0,0,0.4)" : "none" }} />;
+function Swatch({ C, color, active, onClick }) {
+  return <button onClick={onClick} className="w-5 h-5 md:w-6 md:h-6 rounded cursor-pointer transition-transform hover:scale-110" style={{ background: color, border: active ? `2px solid ${C.gold}` : `1px solid ${C.line}`, boxShadow: active ? "0 0 0 1px rgba(0,0,0,0.6)" : "none" }} />;
 }
 function MiniStampCells({ cells, w, h, color }) {
   return (
@@ -1172,26 +1077,26 @@ function MiniStampCells({ cells, w, h, color }) {
     </svg>
   );
 }
-function LayerRow({ layer, active, onSelect, onToggleVisible, onToggleLock, onRename, onDuplicate, onDelete, onOpacity, onMoveUp, onMoveDown, onMerge, canDelete }) {
+function LayerRow({ C, layer, active, onSelect, onToggleVisible, onToggleLock, onRename, onDuplicate, onDelete, onOpacity, onMoveUp, onMoveDown, onMerge, canDelete }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(layer.name);
   return (
-    <div onClick={onSelect} className="rounded px-2 py-1.5 cursor-pointer" style={{ background: active ? C.goldSoft : C.panelAlt, border: `1px solid ${active ? C.gold : C.line}` }}>
+    <div onClick={onSelect} className="rounded px-2 py-1.5 cursor-pointer transition-colors" style={{ background: active ? C.goldSoft : C.panelAlt, border: `1px solid ${active ? C.gold : C.line}` }}>
       <div className="flex items-center gap-1">
-        <button onClick={(e) => { e.stopPropagation(); onToggleVisible(); }} style={{ color: C.muted }}>{layer.visible ? <Eye size={12} /> : <EyeOff size={12} />}</button>
-        <button onClick={(e) => { e.stopPropagation(); onToggleLock(); }} style={{ color: C.muted }}>{layer.locked ? <Lock size={12} /> : <Unlock size={12} />}</button>
+        <button onClick={(e) => { e.stopPropagation(); onToggleVisible(); }} style={{ color: C.muted }} className="hover:text-white">{layer.visible ? <Eye size={12} /> : <EyeOff size={12} />}</button>
+        <button onClick={(e) => { e.stopPropagation(); onToggleLock(); }} style={{ color: C.muted }} className="hover:text-white">{layer.locked ? <Lock size={12} /> : <Unlock size={12} />}</button>
         {editing ? (
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)} onBlur={() => { setEditing(false); onRename(name); }} onKeyDown={(e) => e.key === "Enter" && e.target.blur()} onClick={(e) => e.stopPropagation()} className="flex-1 text-[10px] px-1 py-0.5 rounded min-w-0" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
         ) : (
-          <span onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }} className="flex-1 text-[10px] truncate">{layer.name}</span>
+          <span onDoubleClick={(e) => { e.stopPropagation(); setEditing(true); }} className="flex-1 text-[10px] truncate" style={{ color: C.text }}>{layer.name}</span>
         )}
-        <button onClick={(e) => { e.stopPropagation(); onMoveUp(); }} style={{ color: C.muted }}><ChevronUp size={12} /></button>
-        <button onClick={(e) => { e.stopPropagation(); onMoveDown(); }} style={{ color: C.muted }}><ChevronDown size={12} /></button>
-        <button onClick={(e) => { e.stopPropagation(); onDuplicate(); }} style={{ color: C.muted }}><Copy size={12} /></button>
-        <button onClick={(e) => { e.stopPropagation(); onMerge(); }} style={{ color: C.muted }}><ArrowUpDown size={12} /></button>
-        {canDelete && (<button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ color: C.danger }}><Trash2 size={12} /></button>)}
+        <button onClick={(e) => { e.stopPropagation(); onMoveUp(); }} style={{ color: C.muted }} className="hover:text-white"><ChevronUp size={12} /></button>
+        <button onClick={(e) => { e.stopPropagation(); onMoveDown(); }} style={{ color: C.muted }} className="hover:text-white"><ChevronDown size={12} /></button>
+        <button onClick={(e) => { e.stopPropagation(); onDuplicate(); }} style={{ color: C.muted }} className="hover:text-white"><Copy size={12} /></button>
+        <button onClick={(e) => { e.stopPropagation(); onMerge(); }} style={{ color: C.muted }} className="hover:text-white"><ArrowUpDown size={12} /></button>
+        {canDelete && (<button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ color: C.danger }} className="hover:opacity-70"><Trash2 size={12} /></button>)}
       </div>
-      <div className="flex items-center gap-2 mt-1">
+      <div className="flex items-center gap-2 mt-1.5">
         <span className="text-[9px]" style={{ color: C.muted }}>Opasitas</span>
         <input type="range" min={0} max={1} step={0.05} value={layer.opacity} onClick={(e) => e.stopPropagation()} onChange={(e) => onOpacity(Number(e.target.value))} className="flex-1 h-1" />
       </div>

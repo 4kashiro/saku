@@ -297,6 +297,7 @@ export default function SahabatKuApp() {
   const drawCanvasRef = useRef(null);
   const historyRef = useRef([deepClone(project)]);
   const historyIndexRef = useRef(0);
+  const isPinchingRef = useRef(false);
 
   /* --------------------------- history --------------------------- */
   function pushHistory(nextProject) {
@@ -504,7 +505,7 @@ export default function SahabatKuApp() {
 
   /* --------------------------- pointer handlers --------------------------- */
   function handlePointerDown(e) {
-    if (e.touches && e.touches.length > 1) return;
+    if (isPinchingRef.current) return; // Tambahkan baris ini
     e.preventDefault(); try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (!activeLayer || activeLayer.locked) return;
@@ -539,8 +540,8 @@ export default function SahabatKuApp() {
     }
   }
 
-  function handlePointerMove(e) {
-    if (e.touches && e.touches.length > 1) return;
+function handlePointerMove(e) {
+    if (isPinchingRef.current) return; // Tambahkan baris ini
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
       const from = lastPaintRef.current || { gx, gy };
@@ -586,18 +587,36 @@ export default function SahabatKuApp() {
   /* --------------------------- gesture pinch to zoom --------------------------- */
   function getDistance(t1, t2) { return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
   function handleTouchStart(e) {
-    if (e.touches.length === 2) { 
+    if (e.touches.length >= 2) { 
+      isPinchingRef.current = true;
       pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]); 
       pinchStartZoomRef.current = zoom; 
+      
+      // BATALKAN GORESAN YANG TIDAK SENGAJA TERBUAT OLEH JARI PERTAMA
+      setIsDrawing(false); 
+      setMovingSelection(false); 
+      setDraggingStamp(false);
+      if (draftRef.current) {
+        setProject(deepClone(draftRef.current)); // Kembalikan ke kanvas sebelum disentuh
+        draftRef.current = null;
+      }
     } 
   }
+
   function handleTouchMove(e) {
-    if (e.touches.length === 2 && pinchStartDistRef.current) {
+    if (e.touches.length >= 2 && pinchStartDistRef.current) {
       e.preventDefault(); e.stopPropagation();
       setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (getDistance(e.touches[0], e.touches[1]) / pinchStartDistRef.current))));
     }
   }
-  function handleTouchEnd(e) { if (e.touches.length < 2) pinchStartDistRef.current = null; }
+
+  function handleTouchEnd(e) { 
+    if (e.touches.length < 2) {
+      pinchStartDistRef.current = null;
+      // Beri jeda sedikit sebelum mematikan mode pinch agar pelepasan jari tidak terdeteksi sebagai klik
+      setTimeout(() => { isPinchingRef.current = false; }, 100); 
+    } 
+  }
   
   function handleWheel(e) { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.max(0.2, Math.min(5, z + (e.deltaY < 0 ? 0.1 : -0.1)))); } }
   useEffect(() => { const stage = document.getElementById("canvas-stage"); if(stage) { stage.addEventListener('wheel', handleWheel, {passive: false}); return () => stage.removeEventListener('wheel', handleWheel); } }, []);

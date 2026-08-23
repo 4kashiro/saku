@@ -261,6 +261,7 @@ export default function SahabatKuApp() {
   const [showAbout, setShowAbout] = useState(false); // Modal About
 
   const [panels, setPanels] = useState({
+    theme: { open: true, collapsed: false },
     grid: { open: true, collapsed: false },
     color: { open: true, collapsed: false },
     stamp: { open: true, collapsed: false },
@@ -859,7 +860,7 @@ export default function SahabatKuApp() {
             <div className="flex-1 overflow-y-auto">
               
               {/* PANEL TEMA */}
-              <Panel C={C} title="Tema Aplikasi" icon={<Palette size={14} />} open={true} collapsed={true} onToggleCollapse={() => {}} onClose={() => {}} noCloseIcon>
+              <Panel C={C} title="Tema Aplikasi" icon={<Palette size={14} />} open={panels.theme.open} collapsed={panels.theme.collapsed} onToggleCollapse={() => togglePanelCollapsed("theme")} onClose={() => closePanel("theme")} noCloseIcon>
                  <select 
                     value={appThemeName} 
                     onChange={(e) => setAppThemeName(e.target.value)} 

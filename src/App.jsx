@@ -184,6 +184,7 @@ const PALETTES = {
   "Cherry": ["#5C001E", "#8B0000", "#C9184A", "#FF4D6D", "#FFCCD5"],
   "Golden": ["#3D2B00", "#8C6A00", "#C9A227", "#E5C76B", "#FFF3B0"],
   "Arctic": ["#023047", "#219EBC", "#8ECAE6", "#CAF0F8", "#F8FDFF"],
+
   "Tropical": ["#006D77", "#83C5BE", "#FFDDD2", "#E29578", "#FFB703"]
 };
 const GRID_PRESETS = [

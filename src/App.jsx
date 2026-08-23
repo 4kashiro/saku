@@ -4,7 +4,7 @@ import {
   Eye, EyeOff, Lock, Unlock, Copy, ChevronUp, ChevronDown, ChevronRight, ChevronLeft, Undo2, Redo2,
   ZoomIn, ZoomOut, FilePlus2, FolderOpen, Save, Image as ImageIcon, FileText,
   Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Upload,
-  Slash, Square, Pipette
+  Slash, Square, Pipette, HelpCircle
 } from "lucide-react";
 import customLogo from "./logo.png";
 
@@ -168,7 +168,7 @@ const PALETTES = {
   "Kufi Klasik": ["#1A1A1A", "#F4ECD8", "#C9A227", "#8B5E34"],
   "Gurun Pasir": ["#D2B48C", "#E3C16F", "#B8860B", "#8B4513", "#D9E3CC"],
   "Kufi Emas": ["#FFD700", "#DAA520", "#B8860B", "#F5DEB3", "#FFF8DC"],
-  "Malam Lailatul Qadar": ["#000B18", "#0B1D3A", "#1D3A5F", "#407088", "#EAB543"],
+  "Peaceful Night": ["#000B18", "#0B1D3A", "#1D3A5F", "#407088", "#EAB543"],
   "Senja Manado": ["#FF7E67", "#FF4C4C", "#C0392B", "#8E44AD", "#FAD390"],
   "Kopi Hitam": ["#2C1E16", "#3E2723", "#4E342E", "#5D4037", "#D7CCC8"],
   "Monokrom": ["#000000", "#404040", "#808080", "#BFBFBF", "#FFFFFF"],
@@ -184,7 +184,6 @@ const PALETTES = {
   "Cherry": ["#5C001E", "#8B0000", "#C9184A", "#FF4D6D", "#FFCCD5"],
   "Golden": ["#3D2B00", "#8C6A00", "#C9A227", "#E5C76B", "#FFF3B0"],
   "Arctic": ["#023047", "#219EBC", "#8ECAE6", "#CAF0F8", "#F8FDFF"],
-
   "Tropical": ["#006D77", "#83C5BE", "#FFDDD2", "#E29578", "#FFB703"]
 };
 const GRID_PRESETS = [
@@ -259,6 +258,7 @@ export default function SahabatKuApp() {
   const [, forceTick] = useState(0);
   
   const [sidebarExpanded, setSidebarExpanded] = useState(window.innerWidth > 768);
+  const [showAbout, setShowAbout] = useState(false); // Modal About
 
   const [panels, setPanels] = useState({
     grid: { open: true, collapsed: false },
@@ -695,6 +695,35 @@ export default function SahabatKuApp() {
         .touch-action-none { touch-action: none !important; }
       `}</style>
 
+      {/* ---------- MODAL TENTANG SAKU ---------- */}
+      {showAbout && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm rounded-lg shadow-2xl p-6" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
+            <button onClick={() => setShowAbout(false)} className="absolute top-3 right-3 p-1 rounded transition-colors" style={{ color: C.muted }} onMouseEnter={(e) => (e.currentTarget.style.background = C.panelAlt)} onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+              <X size={18} />
+            </button>
+            
+            <div className="flex flex-col items-center text-center mt-2">
+              <img src={customLogo} alt="SAKU Logo" className="w-16 h-16 object-contain mb-4 drop-shadow-md" />
+              <h2 className="text-xl font-bold tracking-wide mb-2" style={{ color: C.text }}>SAKU: Sahabat Kufi</h2>
+              <p className="text-xs leading-relaxed mb-5" style={{ color: C.muted }}>
+                Aplikasi kanvas web interaktif untuk mendesain kaligrafi Kufi Murabba' dan pixel art. Dirancang dengan presisi grid untuk memudahkan proses kreatif Anda.
+              </p>
+              
+              <div className="w-full h-px mb-5" style={{ background: C.line }} />
+              
+              <p className="text-[11px] mb-2 font-medium" style={{ color: C.text }}>
+                Created by @syarifkufi & @sahabat.sekufi &copy; 2026
+              </p>
+              <p className="text-[10px] leading-relaxed px-2" style={{ color: C.muted }}>
+                Untuk kritik, saran, atau berkolaborasi, silakan DM via Instagram <br/>
+                <a href="https://instagram.com/syarifkufi" target="_blank" rel="noreferrer" className="font-semibold underline transition-opacity hover:opacity-80" style={{ color: C.gold }}>@syarifkufi</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ---------- top bar ---------- */}
       <div className="flex items-center px-4 h-14 shrink-0 border-b relative" style={{ background: C.panel, borderColor: C.line }}>
         
@@ -741,6 +770,12 @@ export default function SahabatKuApp() {
               <IconBtn C={C} title="Export PNG" onClick={exportPNG}><ImageIcon size={16} /></IconBtn>
               <IconBtn C={C} title="Export SVG" onClick={exportSVG}><FileText size={16} /></IconBtn>
               <IconBtn C={C} title="Export PDF" onClick={exportPDF}><Printer size={16} /></IconBtn>
+              
+              <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
+              {/* IKON BANTUAN/TENTANG APLIKASI (KREDIT) */}
+              <IconBtn C={C} title="Tentang SAKU" onClick={() => setShowAbout(true)}>
+                 <HelpCircle size={16} />
+              </IconBtn>
           </div>
         </div>
       </div>
@@ -823,7 +858,7 @@ export default function SahabatKuApp() {
             
             <div className="flex-1 overflow-y-auto">
               
-              {/* PANEL TEMA (BARU) */}
+              {/* PANEL TEMA */}
               <Panel C={C} title="Tema Aplikasi" icon={<Palette size={14} />} open={true} collapsed={true} onToggleCollapse={() => {}} onClose={() => {}} noCloseIcon>
                  <select 
                     value={appThemeName} 
@@ -1003,17 +1038,6 @@ export default function SahabatKuApp() {
                    <button onClick={() => { openPanel("grid"); openPanel("color"); openPanel("stamp"); openPanel("layer"); }} className="mt-3 text-[10px] border px-2 py-1 rounded" style={{ borderColor: C.line, color: C.text }}>Tampilkan Semua</button>
                  </div>
               )}
-            </div>
-
-            {/* CREDITS FOOTER DI BAWAH SIDEBAR */}
-            <div className="p-3 text-center border-t shrink-0 opacity-70" style={{ borderColor: C.line, background: C.panel }}>
-                <p className="text-[9px] mb-0.5 font-medium" style={{ color: C.muted }}>
-                  SAKU: Sahabat Kufi
-                </p>
-                <p className="text-[8px] leading-tight" style={{ color: C.muted }}>
-                  Created by @syarifkufi and @sahabat.sekufi<br/>
-                  &copy; 2026
-                </p>
             </div>
           </div>
         </div>

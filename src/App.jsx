@@ -297,7 +297,10 @@ export default function SahabatKuApp() {
   const drawCanvasRef = useRef(null);
   const historyRef = useRef([deepClone(project)]);
   const historyIndexRef = useRef(0);
-  const activePointersRef = useRef(new Set());
+  const activePointersRef = useRef(new Map());
+  const sessionAbortedRef = useRef(false); // <--- Tambahkan baris ini
+  const pinchStartDistRef = useRef(null);
+  const pinchStartZoomRef = useRef(null);
 
   /* --------------------------- history --------------------------- */
   function pushHistory(nextProject) {
@@ -508,12 +511,11 @@ export default function SahabatKuApp() {
     activePointersRef.current.set(e.pointerId, e);
 
     if (activePointersRef.current.size === 2) {
-      // Masuk ke mode Pinch
+      sessionAbortedRef.current = true; // Langsung tandai sesi batal secara instan
       const pointers = Array.from(activePointersRef.current.values());
       pinchStartDistRef.current = getPointerDistance(pointers[0], pointers[1]);
       pinchStartZoomRef.current = zoom;
       
-      // Batalkan coretan (draft) jari pertama
       if (draftRef.current) {
         setProject(deepClone(historyRef.current[historyIndexRef.current]));
         draftRef.current = null;
@@ -522,8 +524,9 @@ export default function SahabatKuApp() {
       return;
     }
 
-    if (activePointersRef.current.size > 2) return; // Abaikan 3 jari lebih
+    if (activePointersRef.current.size > 2) return;
 
+    sessionAbortedRef.current = false; // Reset tanda pembatalan untuk goresan baru
     e.preventDefault(); try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (!activeLayer || activeLayer.locked) return;
@@ -560,7 +563,7 @@ export default function SahabatKuApp() {
 
   function handlePointerMove(e) {
     if (!activePointersRef.current.has(e.pointerId)) return;
-    activePointersRef.current.set(e.pointerId, e); // Update posisi jari
+    activePointersRef.current.set(e.pointerId, e);
 
     if (activePointersRef.current.size === 2 && pinchStartDistRef.current) {
       e.preventDefault(); e.stopPropagation();
@@ -570,14 +573,15 @@ export default function SahabatKuApp() {
       return;
     }
 
-    if (activePointersRef.current.size > 1 || (!draftRef.current && (isDrawing || movingSelection || draggingStamp))) return;
+    // Jika sedang pinch atau sesi dibatalkan, hentikan fungsi ini!
+    if (activePointersRef.current.size > 1 || sessionAbortedRef.current) return;
 
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
-    if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
+    if (isDrawing && draftRef.current && (activeTool === "pencil" || activeTool === "eraser")) { // Tambahkan draftRef.current sebagai pengaman ekstra
       const from = lastPaintRef.current || { gx, gy };
       if (activeTool === "eraser") eraseLineLive(from, { gx, gy }); else paintLineLive(from, { gx, gy }, activeColor);
       lastPaintRef.current = { gx, gy };
-    } else if (isDrawing && (activeTool === "line" || activeTool === "rect") && shapeStartRef.current) {
+    } else if (isDrawing && draftRef.current && (activeTool === "line" || activeTool === "rect") && shapeStartRef.current) {
       const next = deepClone(shapeBaselineRef.current), layer = next.layers.find((l) => l.id === next.activeLayerId), { gx: sx, gy: sy } = shapeStartRef.current;
       if (activeTool === "line") { bresenhamLine(sx, sy, gx, gy).forEach(([x, y]) => { layer.cells[`${x},${y}`] = activeColor; }); }
       else {
@@ -586,9 +590,9 @@ export default function SahabatKuApp() {
       }
       setProject(next); draftRef.current = next;
     } else if (isDrawing && activeTool === "select") { setSelection((sel) => (sel ? { ...sel, x1: gx, y1: gy } : sel));
-    } else if (movingSelection && moveStartGridRef.current) {
+    } else if (movingSelection && moveStartGridRef.current && moveBaselineRef.current) {
       updateMovePreview(Math.max(0, Math.min(gridCols - moveDimRef.current.w, moveAnchorRef.current.x0 + (gx - moveStartGridRef.current.gx))), Math.max(0, Math.min(gridRows - moveDimRef.current.h, moveAnchorRef.current.y0 + (gy - moveStartGridRef.current.gy))));
-    } else if (draggingStamp && selectedStampId && stampDragAnchorRef.current) {
+    } else if (draggingStamp && selectedStampId && stampDragAnchorRef.current && draftRef.current) {
       const next = draftRef.current, st = next.layers.find((l) => l.id === next.activeLayerId).stamps.find((s) => s.id === selectedStampId);
       if (st) {
         const { w, h } = getEffectiveFootprint(st);
@@ -602,23 +606,25 @@ export default function SahabatKuApp() {
     activePointersRef.current.delete(e.pointerId);
     if (activePointersRef.current.size < 2) pinchStartDistRef.current = null;
 
-    if (!draftRef.current && (isDrawing || movingSelection || draggingStamp)) {
+    if (sessionAbortedRef.current) {
+      // Jika semua jari sudah terangkat, baru kita boleh mulai menggambar lagi
+      if (activePointersRef.current.size === 0) sessionAbortedRef.current = false;
       setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
       try { canvasRef.current && canvasRef.current.releasePointerCapture(e.pointerId); } catch (_) {}
       return;
     }
     
-    if (activePointersRef.current.size > 0) return; // Tunggu sampai semua jari terangkat
+    if (activePointersRef.current.size > 0) return; 
 
-    if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
+    if (isDrawing && draftRef.current && (activeTool === "pencil" || activeTool === "eraser")) {
       if (activeTool === "eraser" && selectedStampId && draftRef.current) { if (!draftRef.current.layers.find((l) => l.id === draftRef.current.activeLayerId)?.stamps.find((s) => s.id === selectedStampId)) setSelectedStampId(null); }
       pushHistory(draftRef.current); draftRef.current = null; lastPaintRef.current = null;
-    } else if (isDrawing && (activeTool === "line" || activeTool === "rect")) {
+    } else if (isDrawing && draftRef.current && (activeTool === "line" || activeTool === "rect")) {
       pushHistory(draftRef.current); addRecentColor(activeColor); draftRef.current = null; shapeBaselineRef.current = null; shapeStartRef.current = null;
     } else if (isDrawing && activeTool === "select") {
       setSelection((sel) => sel ? { x0: Math.min(sel.x0, sel.x1), y0: Math.min(sel.y0, sel.y1), x1: Math.max(sel.x0, sel.x1), y1: Math.max(sel.y0, sel.y1) } : sel);
-    } else if (movingSelection) { pushHistory(draftRef.current); draftRef.current = null; movingBlockRef.current = null; moveBaselineRef.current = null;
-    } else if (draggingStamp) { pushHistory(draftRef.current); draftRef.current = null; }
+    } else if (movingSelection && draftRef.current) { pushHistory(draftRef.current); draftRef.current = null; movingBlockRef.current = null; moveBaselineRef.current = null;
+    } else if (draggingStamp && draftRef.current) { pushHistory(draftRef.current); draftRef.current = null; }
     
     setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
     try { canvasRef.current && canvasRef.current.releasePointerCapture(e.pointerId); } catch (_) {}

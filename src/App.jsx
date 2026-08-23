@@ -508,10 +508,11 @@ export default function SahabatKuApp() {
 
   /* --------------------------- pointer handlers --------------------------- */
   function handlePointerDown(e) {
-    activePointersRef.current.set(e.pointerId, e);
+    // SIMPAN HANYA KOORDINAT, BUKAN OBJEK EVENT
+    activePointersRef.current.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
 
     if (activePointersRef.current.size === 2) {
-      sessionAbortedRef.current = true; // Langsung tandai sesi batal secara instan
+      sessionAbortedRef.current = true; 
       const pointers = Array.from(activePointersRef.current.values());
       pinchStartDistRef.current = getPointerDistance(pointers[0], pointers[1]);
       pinchStartZoomRef.current = zoom;
@@ -524,9 +525,9 @@ export default function SahabatKuApp() {
       return;
     }
 
-    if (activePointersRef.current.size > 2) return;
+    if (activePointersRef.current.size > 2) return; 
 
-    sessionAbortedRef.current = false; // Reset tanda pembatalan untuk goresan baru
+    sessionAbortedRef.current = false; 
     e.preventDefault(); try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
     if (!activeLayer || activeLayer.locked) return;
@@ -563,21 +564,26 @@ export default function SahabatKuApp() {
 
   function handlePointerMove(e) {
     if (!activePointersRef.current.has(e.pointerId)) return;
-    activePointersRef.current.set(e.pointerId, e);
+    
+    // UPDATE HANYA KOORDINAT, BUKAN OBJEK EVENT
+    activePointersRef.current.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
 
     if (activePointersRef.current.size === 2 && pinchStartDistRef.current) {
       e.preventDefault(); e.stopPropagation();
       const pointers = Array.from(activePointersRef.current.values());
-      const currentDist = getPointerDistance(pointers[0], pointers[1]);
-      setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (currentDist / pinchStartDistRef.current))));
+      
+      // Proteksi aman (safety check) agar tidak crash jika array belum siap
+      if (pointers.length === 2 && pointers[0] && pointers[1]) {
+        const currentDist = getPointerDistance(pointers[0], pointers[1]);
+        setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (currentDist / pinchStartDistRef.current))));
+      }
       return;
     }
 
-    // Jika sedang pinch atau sesi dibatalkan, hentikan fungsi ini!
     if (activePointersRef.current.size > 1 || sessionAbortedRef.current) return;
 
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
-    if (isDrawing && draftRef.current && (activeTool === "pencil" || activeTool === "eraser")) { // Tambahkan draftRef.current sebagai pengaman ekstra
+    if (isDrawing && draftRef.current && (activeTool === "pencil" || activeTool === "eraser")) { 
       const from = lastPaintRef.current || { gx, gy };
       if (activeTool === "eraser") eraseLineLive(from, { gx, gy }); else paintLineLive(from, { gx, gy }, activeColor);
       lastPaintRef.current = { gx, gy };
@@ -607,7 +613,6 @@ export default function SahabatKuApp() {
     if (activePointersRef.current.size < 2) pinchStartDistRef.current = null;
 
     if (sessionAbortedRef.current) {
-      // Jika semua jari sudah terangkat, baru kita boleh mulai menggambar lagi
       if (activePointersRef.current.size === 0) sessionAbortedRef.current = false;
       setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
       try { canvasRef.current && canvasRef.current.releasePointerCapture(e.pointerId); } catch (_) {}
@@ -860,12 +865,17 @@ export default function SahabatKuApp() {
             </div>
           ) : null}
           
-          <div className="max-w-full max-h-full overflow-auto p-4 md:p-6 touch-action-none">
+          <div className="max-w-full max-h-full overflow-auto p-4 md:p-6">
             <canvas
               ref={canvasRef} draggable={false} onDragStart={(e) => e.preventDefault()}
               onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp} onPointerLeave={handlePointerLeave}
-              style={{ cursor: activeTool === "select" ? "default" : "crosshair", boxShadow: "0 8px 30px rgba(0,0,0,0.5)", imageRendering: "pixelated" }}
+              style={{ 
+                cursor: activeTool === "select" ? "default" : "crosshair", 
+                boxShadow: "0 8px 30px rgba(0,0,0,0.5)", 
+                imageRendering: "pixelated",
+                touchAction: "none" // <--- TAMBAHKAN BARIS INI
+              }}
             />
           </div>
         </div>

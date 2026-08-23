@@ -857,7 +857,7 @@ export default function SahabatKuApp() {
               <span className="text-sm font-semibold" style={{ color: C.text }}>Panel Kontrol</span>
             </div>
             
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto pb-20">
               
               {/* PANEL TEMA */}
               <Panel C={C} title="Tema Aplikasi" icon={<Palette size={14} />} open={panels.theme.open} collapsed={panels.theme.collapsed} onToggleCollapse={() => togglePanelCollapsed("theme")} onClose={() => closePanel("theme")} noCloseIcon>

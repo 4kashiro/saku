@@ -4,7 +4,7 @@ import {
   Eye, EyeOff, Lock, Unlock, Copy, ChevronUp, ChevronDown, ChevronRight, ChevronLeft, Undo2, Redo2,
   ZoomIn, ZoomOut, FilePlus2, FolderOpen, Save, Image as ImageIcon, FileText,
   Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Upload,
-  Slash, Square
+  Slash, Square, Pipette
 } from "lucide-react";
 import customLogo from "./logo.png";
 
@@ -76,19 +76,26 @@ const STAMP_LABELS = {
   "hha": "Hha", "hha-5": "Hha-5", "hha-7": "Hha-7", "lamalif": "Lamalif", "lamalif-5": "Lamalif-5",
   "hamzah": "Hamzah", "hamzah-5": "Hamzah-5", "ya": "Ya", "ya-7": "Ya-7",
 };
-const STAMP_ORDER = [
-  "allah", "muhammad", "alif", "ba", "ba-5", "ba-7", "ta", "tsa", "jim", "jim-5", 
+const KUFI_STAMP_IDS = ["allah", "muhammad"];
+const HURUF_STAMP_IDS = [
+  "alif", "ba", "ba-5", "ba-7", "ta", "tsa", "jim", "jim-5", 
   "ha", "dal", "dal-5", "ra", "sin", "shad", "tha", "tha-5", "ain", "ain-7", "fa", 
   "kaf", "rumahkaf", "rumahkaf-7", "lam", "lam-5", "mim", "mim-5", "nun", "nun-5", 
   "wau", "waw-7", "hha", "hha-5", "hha-7", "lamalif", "lamalif-5", "hamzah", "hamzah-5", 
   "ya", "ya-7"
 ];
-const BUILTIN_STAMPS = STAMP_ORDER.map((id) => {
-  const cells = STAMP_SHAPES[id];
-  const maxX = Math.max(...cells.map(coord => coord[0]));
-  const maxY = Math.max(...cells.map(coord => coord[1]));
-  return { id, kind: "cells", w: maxX + 1, h: maxY + 1, cells: cells, label: STAMP_LABELS[id], builtin: true };
-});
+
+function generateStampObjects(ids) {
+  return ids.map((id) => {
+    const cells = STAMP_SHAPES[id];
+    const maxX = Math.max(...cells.map(coord => coord[0]));
+    const maxY = Math.max(...cells.map(coord => coord[1]));
+    return { id, kind: "cells", w: maxX + 1, h: maxY + 1, cells: cells, label: STAMP_LABELS[id], builtin: true };
+  });
+}
+const BUILTIN_STAMPS_KUFI = generateStampObjects(KUFI_STAMP_IDS);
+const BUILTIN_STAMPS_HURUF = generateStampObjects(HURUF_STAMP_IDS);
+const ALL_BUILTIN = [...BUILTIN_STAMPS_KUFI, ...BUILTIN_STAMPS_HURUF];
 const MAX_STAMP = 64; 
 
 function rotSteps(rotation) { return (((rotation / 90) % 4) + 4) % 4; }
@@ -151,16 +158,26 @@ function drawStampOnCtx(ctx, st, cellPx, imageCacheRef, onImageReady, alpha) {
 const PALETTES = {
   "Sahabat Purple": ["#462C7D", "#831C91", "#D552A3", "#FF70BF"],
   "Kufi Klasik": ["#1A1A1A", "#F4ECD8", "#C9A227", "#8B5E34"],
-  Monokrom: ["#000000", "#404040", "#808080", "#BFBFBF", "#FFFFFF"],
-  "Pixel Retro": ["#FF004D", "#00E5FF", "#FFEC27", "#1A1A2E", "#29ADFF", "#00E436"],
-  "Modern Neon": ["#0D0D0D", "#FF2E63", "#08D9D6", "#F9F871"],
-  "Earth Tone": ["#5C4033", "#A9746E", "#D2B48C", "#6B8E23", "#3E2723"],
-  Premium: ["#000000", "#FFFFFF", "#D4AF37", "#0A0A0A"],
-  "Pastel Dream": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
-  "Cyberpunk": ["#FCEE09", "#00FFF5", "#FF007F", "#111111", "#7B00FF"],
+  "Gurun Pasir": ["#D2B48C", "#E3C16F", "#B8860B", "#8B4513", "#D9E3CC"],
+  "Kufi Emas": ["#FFD700", "#DAA520", "#B8860B", "#F5DEB3", "#FFF8DC"],
+  "Peaceful Night": ["#000B18", "#0B1D3A", "#1D3A5F", "#407088", "#EAB543"],
+  "Senja Manado": ["#FF7E67", "#FF4C4C", "#C0392B", "#8E44AD", "#FAD390"],
+  "Black Coffee": ["#2C1E16", "#3E2723", "#4E342E", "#5D4037", "#D7CCC8"],
+  "Monokrom": ["#000000", "#404040", "#808080", "#BFBFBF", "#FFFFFF"],
+  "Pastel Sakura": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF"],
+  "Neon Cyber": ["#FCEE09", "#00FFF5", "#FF007F", "#111111", "#7B00FF"],
   "Forest": ["#2C5F2D", "#97BC62", "#113014", "#D8E2DC"],
-  "Sunset": ["#FF4E50", "#FC913A", "#F9D423", "#EDE574"],
   "Ocean": ["#00B4DB", "#0083B0", "#E0EAFC", "#CFDEF3"],
+  "Sunset": ["#FF6B6B", "#FF8E53", "#FFD166", "#EF476F", "#8338EC"],
+  "Royal": ["#1A1A2E", "#16213E", "#0F3460", "#533483", "#E94560"],
+  "Desert": ["#C1666B", "#E3A857", "#F4D35E", "#EE964B", "#6B4226"],
+  "Lavender": ["#6C5CE7", "#A29BFE", "#C8B6FF", "#E2D9F3", "#F8F7FF"],
+  "Mint": ["#004D40", "#00796B", "#26A69A", "#80CBC4", "#E0F2F1"],
+  "Coffee": ["#3E2723", "#5D4037", "#795548", "#A1887F", "#D7CCC8"],
+  "Cherry": ["#5C001E", "#8B0000", "#C9184A", "#FF4D6D", "#FFCCD5"],
+  "Golden": ["#3D2B00", "#8C6A00", "#C9A227", "#E5C76B", "#FFF3B0"],
+  "Arctic": ["#023047", "#219EBC", "#8ECAE6", "#CAF0F8", "#F8FDFF"],
+  "Tropical": ["#006D77", "#83C5BE", "#FFDDD2", "#E29578", "#FFB703"]
 };
 const GRID_PRESETS = [
   { label: "16×16", cols: 16, rows: 16 },
@@ -209,9 +226,12 @@ export default function SahabatKuApp() {
   const [csvText, setCsvText] = useState("");
   const [csvName, setCsvName] = useState("");
   const [showCsvForm, setShowCsvForm] = useState(false);
+  
+  // Kategori Stempel (Default Tertutup)
+  const [stampCats, setStampCats] = useState({ kufi: false, huruf: false, custom: false });
 
-  const stampLibrary = [...BUILTIN_STAMPS, ...customCsvStamps, ...customImageStamps];
-  const chosenStamp = stampLibrary.find((s) => s.id === stampChoiceId) || BUILTIN_STAMPS[0];
+  const stampLibrary = [...ALL_BUILTIN, ...customCsvStamps, ...customImageStamps];
+  const chosenStamp = stampLibrary.find((s) => s.id === stampChoiceId) || ALL_BUILTIN[0];
 
   useEffect(() => {
     if (chosenStamp.kind === "cells") {
@@ -229,16 +249,20 @@ export default function SahabatKuApp() {
   const [draggingStamp, setDraggingStamp] = useState(false);
   const [, forceTick] = useState(0);
   
-  // Default tertutup di HP agar canvas terlihat.
   const [sidebarExpanded, setSidebarExpanded] = useState(window.innerWidth > 768);
 
-  // Define panels state mapping
   const [panels, setPanels] = useState({
     grid: { open: true, collapsed: false },
     color: { open: true, collapsed: false },
     stamp: { open: true, collapsed: false },
     layer: { open: true, collapsed: false },
   });
+
+  const pinchStartDistRef = useRef(null);
+  const pinchStartZoomRef = useRef(null);
+  
+  // Untuk warna custom (color picker)
+  const colorPickerRef = useRef(null);
 
   function togglePanelCollapsed(key) {
     setPanels((p) => ({ ...p, [key]: { ...p[key], collapsed: !p[key].collapsed } }));
@@ -249,6 +273,9 @@ export default function SahabatKuApp() {
   function openPanel(key) {
     if(!sidebarExpanded) setSidebarExpanded(true);
     setPanels((p) => ({ ...p, [key]: { open: true, collapsed: false } }));
+  }
+  function closePanel(key) {
+    setPanels((p) => ({ ...p, [key]: { ...p[key], open: false } }));
   }
 
   const canvasRef = useRef(null);
@@ -551,6 +578,7 @@ export default function SahabatKuApp() {
     reader.onload = (ev) => {
       const entry = { id: uid(), kind: "image", name: file.name.replace(/\.[^.]+$/, ""), label: file.name.replace(/\.[^.]+$/, ""), dataUrl: ev.target.result };
       setCustomImageStamps((prev) => [...prev, entry]); setStampChoiceId(entry.id); setActiveTool("stamp");
+      setStampCats(c => ({...c, custom: true})); // Buka tab custom otomatis
     };
     reader.readAsDataURL(file); e.target.value = "";
   }
@@ -560,6 +588,7 @@ export default function SahabatKuApp() {
     const entry = { id: uid(), kind: "cells", w: parsed.w, h: parsed.h, cells: parsed.cells, label: csvName.trim() || "Stempel CSV" };
     setCustomCsvStamps((prev) => [...prev, entry]); setStampChoiceId(entry.id); setActiveTool("stamp");
     setCsvText(""); setCsvName(""); setShowCsvForm(false);
+    setStampCats(c => ({...c, custom: true}));
   }
   function rotateActive() { if (selection) rotateSelection(); else if (selectedStampId) rotateSelectedStamp(); }
   function deleteActive() { if (selection) deleteSelection(); else if (selectedStampId) deleteSelectedStamp(); }
@@ -665,13 +694,22 @@ export default function SahabatKuApp() {
   
   /* --------------------------- gesture pinch to zoom --------------------------- */
   function getDistance(t1, t2) { return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
-  function handleTouchStart(e) { if (e.touches.length === 2) { pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]); pinchStartZoomRef.current = zoom; } }
+  function handleTouchStart(e) {
+    if (e.touches.length === 2) { 
+      pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]); 
+      pinchStartZoomRef.current = zoom; 
+    } 
+  }
   function handleTouchMove(e) {
     if (e.touches.length === 2 && pinchStartDistRef.current) {
-      e.preventDefault(); setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (getDistance(e.touches[0], e.touches[1]) / pinchStartDistRef.current))));
+      e.preventDefault(); 
+      e.stopPropagation(); // Mencegah geser layar default browser
+      const newZoom = pinchStartZoomRef.current * (getDistance(e.touches[0], e.touches[1]) / pinchStartDistRef.current);
+      setZoom(Math.max(0.2, Math.min(5, newZoom)));
     }
   }
   function handleTouchEnd(e) { if (e.touches.length < 2) pinchStartDistRef.current = null; }
+  
   function handleWheel(e) {
     if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.max(0.2, Math.min(5, z + (e.deltaY < 0 ? 0.1 : -0.1)))); }
   }
@@ -770,26 +808,21 @@ export default function SahabatKuApp() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Inter:wght@400;500;600;700&display=swap');
         input[type=range]{ accent-color: ${C.gold}; }
-        input[type=color]{ border:none; padding:0; background:none; }
+        input[type=color]{ opacity: 0; position: absolute; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer; }
         ::-webkit-scrollbar{ width:4px; height:4px; }
         ::-webkit-scrollbar-thumb{ background:${C.line}; border-radius:4px; }
-        canvas{ -webkit-user-drag:none; user-select:none; -webkit-touch-callout:none; touch-action:none; }
+        .touch-action-none { touch-action: none !important; }
       `}</style>
 
       {/* ---------- top bar ---------- */}
       <div className="flex items-center px-4 h-14 shrink-0 border-b relative" style={{ background: C.panel, borderColor: C.line }}>
         
-        {/* LOGO DIKUNCI DI KIRI AGAR TIDAK HILANG */}
+        {/* LOGO DIKUNCI DI KIRI */}
         <div className="flex items-center gap-2 mr-3 shrink-0 z-10 sticky left-0" style={{ background: C.panel }}>
-          <img 
-            src={customLogo} 
-            alt="SahabatKu Logo" 
-            style={{ height: "32px", width: "auto", objectFit: "contain" }} 
-            className="shrink-0"
-          />
+          <img src={customLogo} alt="SahabatKu Logo" style={{ height: "32px", width: "auto", objectFit: "contain" }} className="shrink-0" />
         </div>
         
-        {/* SISA MENU BISA DI-SCROLL KE KANAN JIKA LAYAR SEMPIT */}
+        {/* MENU */}
         <div className="flex items-center gap-1.5 overflow-x-auto overflow-y-hidden flex-1 pb-1">
           <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
           <IconBtn title="Baru" onClick={newCanvas}><FilePlus2 size={16} /></IconBtn>
@@ -858,17 +891,14 @@ export default function SahabatKuApp() {
           ) : activeTool === "rect" ? (
             <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
               <span className="text-[10px] md:text-xs" style={{ color: C.muted }}>Kotak</span>
-              <button
-                onClick={() => setRectFilled((f) => !f)}
-                className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded"
-                style={{ background: rectFilled ? C.goldSoft : "transparent", color: rectFilled ? C.gold : C.text, border: `1px solid ${C.line}` }}
-              >
+              <button onClick={() => setRectFilled((f) => !f)} className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: rectFilled ? C.goldSoft : "transparent", color: rectFilled ? C.gold : C.text, border: `1px solid ${C.line}` }}>
                 <Square size={13} /> {rectFilled ? "Terisi" : "Garis Tepi"}
               </button>
             </div>
           ) : null}
+          
           <div 
-             className="max-w-full max-h-full overflow-auto p-4 md:p-6 touch-none" 
+             className="max-w-full max-h-full overflow-auto p-4 md:p-6 touch-action-none" 
              onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
           >
             <canvas
@@ -880,11 +910,11 @@ export default function SahabatKuApp() {
           </div>
         </div>
 
-        {/* Right Sidebar Area - DIBUAT ABSOLUTE DI HP AGAR TIDAK MENGGENCET KANVAS */}
+        {/* Right Sidebar Area */}
         <div className={`absolute top-0 right-0 h-full bg-[#3A2266] z-30 transition-transform duration-300 flex border-l md:relative shadow-2xl md:shadow-none`} 
              style={{ borderColor: C.line, transform: sidebarExpanded ? 'translateX(0)' : 'translateX(100%)' }}>
           
-          {/* Toggle Panel Button - Selalu nempel di kiri Sidebar (bergeser ikut sidebar) */}
+          {/* Toggle Panel Button */}
           <div 
              onClick={toggleSidebar}
              className="absolute top-1/2 -left-6 md:-left-5 -translate-y-1/2 w-6 md:w-5 h-16 md:h-12 flex items-center justify-center cursor-pointer rounded-l-md shadow-[0_0_10px_rgba(0,0,0,0.5)] md:shadow-md bg-[#462C7D]" 
@@ -894,7 +924,6 @@ export default function SahabatKuApp() {
             {sidebarExpanded ? <ChevronRight size={18} color={C.gold} /> : <ChevronLeft size={18} color={C.gold} />}
           </div>
 
-          {/* Bar Icon Vertikal (Hanya muncul jika panel tertutup, KHUSUS LAYAR LEBAR) */}
           {!sidebarExpanded && (
             <div className="w-12 h-full hidden md:flex flex-col items-center py-4 gap-3 bg-[#3A2266] absolute right-[100%] border-l" style={{ borderColor: C.line }}>
               <PanelToggle title="Buka Panel Grid" onClick={() => openPanel("grid")}><Grid3x3 size={18} /></PanelToggle>
@@ -910,8 +939,8 @@ export default function SahabatKuApp() {
               <span className="text-sm font-semibold text-[#F6EEFA]">Panel Kontrol</span>
             </div>
             
-            {/* Scrollable Panels Area */}
             <div className="flex-1 overflow-y-auto">
+              {/* GRID */}
               <Panel title="Kanvas & Grid" icon={<Grid3x3 size={14} />} open={panels.grid.open} collapsed={panels.grid.collapsed} onToggleCollapse={() => togglePanelCollapsed("grid")} onClose={() => closePanel("grid")}>
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {GRID_PRESETS.map((p) => (
@@ -931,11 +960,18 @@ export default function SahabatKuApp() {
                 <ToggleRow label="Grid Alternatif" checked={showAltShading} onChange={setShowAltShading} />
               </Panel>
 
+              {/* WARNA */}
               <Panel title="Warna" icon={<Palette size={14} />} open={panels.color.open} collapsed={panels.color.collapsed} onToggleCollapse={() => togglePanelCollapsed("color")} onClose={() => closePanel("color")}>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-8 h-8 rounded border-2" style={{ background: activeColor, borderColor: C.line }} />
-                  <input type="color" value={pickerColor} onChange={(e) => { setPickerColor(e.target.value); pickColor(e.target.value); }} className="w-8 h-8 rounded cursor-pointer" />
-                  <button onClick={() => setCustomPalette((prev) => (prev.includes(pickerColor) ? prev : [...prev, pickerColor].slice(-16)))} className="text-[10px] px-2 py-1 rounded flex items-center gap-1" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><Plus size={12} /> Palet</button>
+                  
+                  {/* COLOR PICKER ICON */}
+                  <div className="relative w-8 h-8 rounded flex items-center justify-center cursor-pointer overflow-hidden group" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }} title="Pilih Warna">
+                    <Pipette size={14} className="text-[#C6AEE0] group-hover:text-white" />
+                    <input type="color" value={pickerColor} onChange={(e) => { setPickerColor(e.target.value); pickColor(e.target.value); }} />
+                  </div>
+                  
+                  <button onClick={() => setCustomPalette((prev) => (prev.includes(pickerColor) ? prev : [...prev, pickerColor].slice(-16)))} className="text-[10px] px-2 py-1 rounded flex items-center gap-1 ml-auto" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}><Plus size={12} /> Palet</button>
                 </div>
                 <select value={activePaletteName} onChange={(e) => setActivePaletteName(e.target.value)} className="w-full text-[11px] md:text-xs px-2 py-1.5 rounded mb-2" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}>
                   {Object.keys(PALETTES).map((name) => (<option key={name} value={name}>{name}</option>))}
@@ -945,49 +981,88 @@ export default function SahabatKuApp() {
                 {recentColors.length > 0 && (<><p className="text-[10px] mb-1" style={{ color: C.muted }}>History</p><div className="flex flex-wrap gap-1.5">{recentColors.map((c, i) => (<Swatch key={c + i} color={c} active={c === activeColor} onClick={() => pickColor(c)} />))}</div></>)}
               </Panel>
 
+              {/* STEMPEL */}
               <Panel title="Stempel" icon={<Stamp size={14} />} open={panels.stamp.open} collapsed={panels.stamp.collapsed} onToggleCollapse={() => togglePanelCollapsed("stamp")} onClose={() => closePanel("stamp")}>
-                <p className="text-[10px] mb-1" style={{ color: C.muted }}>Bentuk Bawaan</p>
-                <div className="grid grid-cols-4 md:grid-cols-3 gap-1.5 mb-3">
-                  {BUILTIN_STAMPS.map((s) => (
-                    <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
-                      <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-[10px]" style={{ color: C.muted }}>CSV & Gambar</p>
-                  <button onClick={() => setShowCsvForm((s) => !s)} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>{showCsvForm ? "Tutup" : "+ CSV"}</button>
-                </div>
-                {customCsvStamps.length > 0 && (
-                  <div className="grid grid-cols-4 gap-1.5 mb-2">
-                    {customCsvStamps.map((s) => (
-                      <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
-                        <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {showCsvForm && (
-                  <div className="mb-2 p-1.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-                    <input value={csvName} onChange={(e) => setCsvName(e.target.value)} placeholder="Nama (mis. Alif)" className="w-full text-[10px] px-1.5 py-1 rounded mb-1" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
-                    <textarea value={csvText} onChange={(e) => setCsvText(e.target.value)} placeholder={"000;010;000"} rows={2} className="w-full text-[10px] font-mono px-1.5 py-1 rounded mb-1" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
-                    <button onClick={handleAddCsvStamp} className="w-full text-[10px] py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Tambah CSV</button>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-4 gap-1.5 mb-2">
-                  {customImageStamps.map((cs) => (
-                    <button key={cs.id} title={cs.label} onClick={() => { setStampChoiceId(cs.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center overflow-hidden" style={{ borderColor: stampChoiceId === cs.id ? C.gold : C.line, background: C.panelAlt }}>
-                      <img src={cs.dataUrl} alt={cs.label} className="w-full h-full object-contain" />
-                    </button>
-                  ))}
-                  <button onClick={() => stampUploadRef.current.click()} className="aspect-square rounded border border-dashed flex items-center justify-center" style={{ borderColor: C.line, color: C.muted }} title="Unggah Gambar">
-                    <Upload size={14} />
-                  </button>
-                  <input ref={stampUploadRef} type="file" accept="image/*" className="hidden" onChange={handleUploadStamp} />
-                </div>
                 
+                {/* Accordion Kufi Stamp */}
+                <div className="mb-2 border rounded overflow-hidden" style={{ borderColor: C.line }}>
+                  <button onClick={() => setStampCats(c => ({...c, kufi: !c.kufi}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px] bg-[#3A2266] hover:bg-[#462C7D]">
+                    <span>Kufi Stamp</span>
+                    {stampCats.kufi ? <ChevronDown size={12}/> : <ChevronUp size={12}/>}
+                  </button>
+                  {stampCats.kufi && (
+                    <div className="p-2 bg-[#2C1B4D] grid grid-cols-4 md:grid-cols-3 gap-1.5">
+                      {BUILTIN_STAMPS_KUFI.map((s) => (
+                        <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+                          <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Accordion Huruf Kufi */}
+                <div className="mb-2 border rounded overflow-hidden" style={{ borderColor: C.line }}>
+                  <button onClick={() => setStampCats(c => ({...c, huruf: !c.huruf}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px] bg-[#3A2266] hover:bg-[#462C7D]">
+                    <span>Huruf Kufi</span>
+                    {stampCats.huruf ? <ChevronDown size={12}/> : <ChevronUp size={12}/>}
+                  </button>
+                  {stampCats.huruf && (
+                    <div className="p-2 bg-[#2C1B4D] grid grid-cols-4 md:grid-cols-3 gap-1.5">
+                      {BUILTIN_STAMPS_HURUF.map((s) => (
+                        <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+                          <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Accordion Custom */}
+                <div className="mb-3 border rounded overflow-hidden" style={{ borderColor: C.line }}>
+                  <button onClick={() => setStampCats(c => ({...c, custom: !c.custom}))} className="w-full px-2 py-1.5 flex justify-between items-center text-[11px] bg-[#3A2266] hover:bg-[#462C7D]">
+                    <span>Custom</span>
+                    {stampCats.custom ? <ChevronDown size={12}/> : <ChevronUp size={12}/>}
+                  </button>
+                  {stampCats.custom && (
+                    <div className="p-2 bg-[#2C1B4D]">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-[10px]" style={{ color: C.muted }}>Stempel Anda</p>
+                        <button onClick={() => setShowCsvForm((s) => !s)} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.muted }}>{showCsvForm ? "Tutup" : "+ CSV"}</button>
+                      </div>
+                      
+                      {showCsvForm && (
+                        <div className="mb-2 p-1.5 rounded" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
+                          <input value={csvName} onChange={(e) => setCsvName(e.target.value)} placeholder="Nama (mis. Alif)" className="w-full text-[10px] px-1.5 py-1 rounded mb-1" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
+                          <textarea value={csvText} onChange={(e) => setCsvText(e.target.value)} placeholder={"000;010;000"} rows={2} className="w-full text-[10px] font-mono px-1.5 py-1 rounded mb-1" style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }} />
+                          <button onClick={handleAddCsvStamp} className="w-full text-[10px] py-1 rounded" style={{ background: C.gold, color: C.chrome }}>Tambah CSV</button>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-4 md:grid-cols-3 gap-1.5">
+                        {customCsvStamps.map((s) => (
+                          <button key={s.id} title={s.label} onClick={() => { setStampChoiceId(s.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center" style={{ borderColor: stampChoiceId === s.id ? C.gold : C.line, background: stampChoiceId === s.id ? C.goldSoft : C.panelAlt }}>
+                            <MiniStampCells cells={s.cells} w={s.w} h={s.h} color={stampChoiceId === s.id ? C.gold : C.muted} />
+                          </button>
+                        ))}
+                        {customImageStamps.map((cs) => (
+                          <button key={cs.id} title={cs.label} onClick={() => { setStampChoiceId(cs.id); setActiveTool("stamp"); }} className="aspect-square rounded border p-1 flex items-center justify-center overflow-hidden" style={{ borderColor: stampChoiceId === cs.id ? C.gold : C.line, background: C.panelAlt }}>
+                            <img src={cs.dataUrl} alt={cs.label} className="w-full h-full object-contain" />
+                          </button>
+                        ))}
+                        <button onClick={() => stampUploadRef.current.click()} className="aspect-square rounded border border-dashed flex items-center justify-center" style={{ borderColor: C.line, color: C.muted }} title="Unggah Gambar">
+                          <Upload size={14} />
+                        </button>
+                        <input ref={stampUploadRef} type="file" accept="image/*" className="hidden" onChange={handleUploadStamp} />
+                      </div>
+                      {(customCsvStamps.length === 0 && customImageStamps.length === 0) && (
+                         <p className="text-[10px] text-center mt-2 opacity-50">Belum ada stempel custom</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Stamp Properties */}
                 <div className="mb-2">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px]" style={{ color: C.muted }}>Ukuran (Sel)</span>
@@ -1008,6 +1083,7 @@ export default function SahabatKuApp() {
                 </div>
               </Panel>
 
+              {/* LAYER */}
               <Panel title="Layer" icon={<LayersIcon size={14} />} open={panels.layer.open} collapsed={panels.layer.collapsed} onToggleCollapse={() => togglePanelCollapsed("layer")} onClose={() => closePanel("layer")} noBorder>
                 <button onClick={addLayer} className="w-full text-xs py-1.5 rounded mb-2 flex items-center justify-center gap-1" style={{ background: C.gold, color: C.chrome }}><Plus size={13} /> Tambah Layer</button>
                 <div className="flex flex-col gap-1.5">

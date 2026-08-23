@@ -505,10 +505,15 @@ export default function SahabatKuApp() {
 
   /* --------------------------- pointer handlers --------------------------- */
   function handlePointerDown(e) {
-    activePointersRef.current.add(e.pointerId);
+    activePointersRef.current.set(e.pointerId, e);
 
-    // JIKA ADA LEBIH DARI 1 JARI (PINCH), BATALKAN GORESAN YANG TIDAK SENGAJA TERCIPTA
-    if (activePointersRef.current.size > 1) {
+    if (activePointersRef.current.size === 2) {
+      // Masuk ke mode Pinch
+      const pointers = Array.from(activePointersRef.current.values());
+      pinchStartDistRef.current = getPointerDistance(pointers[0], pointers[1]);
+      pinchStartZoomRef.current = zoom;
+      
+      // Batalkan coretan (draft) jari pertama
       if (draftRef.current) {
         setProject(deepClone(historyRef.current[historyIndexRef.current]));
         draftRef.current = null;
@@ -516,6 +521,8 @@ export default function SahabatKuApp() {
       setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
       return;
     }
+
+    if (activePointersRef.current.size > 2) return; // Abaikan 3 jari lebih
 
     e.preventDefault(); try { canvasRef.current.setPointerCapture(e.pointerId); } catch (_) {}
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
@@ -551,8 +558,18 @@ export default function SahabatKuApp() {
     }
   }
 
-function handlePointerMove(e) {
-    // JANGAN MENGGAMBAR JIKA SEDANG PINCH ATAU SESI SUDAH DIBATALKAN
+  function handlePointerMove(e) {
+    if (!activePointersRef.current.has(e.pointerId)) return;
+    activePointersRef.current.set(e.pointerId, e); // Update posisi jari
+
+    if (activePointersRef.current.size === 2 && pinchStartDistRef.current) {
+      e.preventDefault(); e.stopPropagation();
+      const pointers = Array.from(activePointersRef.current.values());
+      const currentDist = getPointerDistance(pointers[0], pointers[1]);
+      setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (currentDist / pinchStartDistRef.current))));
+      return;
+    }
+
     if (activePointersRef.current.size > 1 || (!draftRef.current && (isDrawing || movingSelection || draggingStamp))) return;
 
     const { gx, gy } = getGridCoords(e); setHoverCell({ gx, gy });
@@ -583,15 +600,16 @@ function handlePointerMove(e) {
 
   function handlePointerUp(e) {
     activePointersRef.current.delete(e.pointerId);
+    if (activePointersRef.current.size < 2) pinchStartDistRef.current = null;
 
-    // JIKA SESI KOSONG (DIBATALKAN OLEH PINCH), HENTIKAN PROSES
     if (!draftRef.current && (isDrawing || movingSelection || draggingStamp)) {
       setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
       try { canvasRef.current && canvasRef.current.releasePointerCapture(e.pointerId); } catch (_) {}
       return;
     }
-    if (isPinchingRef.current) return; // Tambahkan proteksi ini
-    if (e.touches && e.touches.length > 1) return;
+    
+    if (activePointersRef.current.size > 0) return; // Tunggu sampai semua jari terangkat
+
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
       if (activeTool === "eraser" && selectedStampId && draftRef.current) { if (!draftRef.current.layers.find((l) => l.id === draftRef.current.activeLayerId)?.stamps.find((s) => s.id === selectedStampId)) setSelectedStampId(null); }
       pushHistory(draftRef.current); draftRef.current = null; lastPaintRef.current = null;
@@ -601,35 +619,25 @@ function handlePointerMove(e) {
       setSelection((sel) => sel ? { x0: Math.min(sel.x0, sel.x1), y0: Math.min(sel.y0, sel.y1), x1: Math.max(sel.x0, sel.x1), y1: Math.max(sel.y0, sel.y1) } : sel);
     } else if (movingSelection) { pushHistory(draftRef.current); draftRef.current = null; movingBlockRef.current = null; moveBaselineRef.current = null;
     } else if (draggingStamp) { pushHistory(draftRef.current); draftRef.current = null; }
+    
     setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
     try { canvasRef.current && canvasRef.current.releasePointerCapture(e.pointerId); } catch (_) {}
   }
-  function handlePointerLeave() 
-  { if (isPinchingRef.current) return; // Tambahkan proteksi ini
+
+  function handlePointerLeave(e) { 
+    activePointersRef.current.delete(e.pointerId);
+    if (activePointersRef.current.size < 2) pinchStartDistRef.current = null;
     if (!isDrawing && !movingSelection && !draggingStamp) setHoverCell(null); 
   }
   
   /* --------------------------- gesture pinch to zoom --------------------------- */
-  function getDistance(t1, t2) { return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
-  function handleTouchStart(e) {
-    if (e.touches.length === 2) { 
-      pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]); 
-      pinchStartZoomRef.current = zoom; 
-    } 
-  }
+  const activePointersRef = useRef(new Map()); // Ubah dari Set menjadi Map
+  const pinchStartDistRef = useRef(null);
+  const pinchStartZoomRef = useRef(null);
 
-  function handleTouchMove(e) {
-    if (e.touches.length === 2 && pinchStartDistRef.current) {
-      e.preventDefault(); e.stopPropagation();
-      setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (getDistance(e.touches[0], e.touches[1]) / pinchStartDistRef.current))));
-    }
+  function getPointerDistance(p1, p2) { 
+    return Math.hypot(p1.clientX - p2.clientX, p1.clientY - p2.clientY); 
   }
-
-  function handleTouchEnd(e) { 
-    if (e.touches.length < 2) pinchStartDistRef.current = null;
-    if (e.touches.length === 0) activePointersRef.current.clear(); // Safety net 
-  }
-  
   function handleWheel(e) { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom((z) => Math.max(0.2, Math.min(5, z + (e.deltaY < 0 ? 0.1 : -0.1)))); } }
   useEffect(() => { const stage = document.getElementById("canvas-stage"); if(stage) { stage.addEventListener('wheel', handleWheel, {passive: false}); return () => stage.removeEventListener('wheel', handleWheel); } }, []);
   useEffect(() => {
@@ -846,10 +854,7 @@ function handlePointerMove(e) {
             </div>
           ) : null}
           
-          <div 
-             className="max-w-full max-h-full overflow-auto p-4 md:p-6 touch-action-none" 
-             onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
-          >
+          <div className="max-w-full max-h-full overflow-auto p-4 md:p-6 touch-action-none">
             <canvas
               ref={canvasRef} draggable={false} onDragStart={(e) => e.preventDefault()}
               onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}

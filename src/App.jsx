@@ -569,6 +569,7 @@ function handlePointerMove(e) {
   }
 
   function handlePointerUp(e) {
+    if (isPinchingRef.current) return; // Tambahkan proteksi ini
     if (e.touches && e.touches.length > 1) return;
     if (isDrawing && (activeTool === "pencil" || activeTool === "eraser")) {
       if (activeTool === "eraser" && selectedStampId && draftRef.current) { if (!draftRef.current.layers.find((l) => l.id === draftRef.current.activeLayerId)?.stamps.find((s) => s.id === selectedStampId)) setSelectedStampId(null); }
@@ -582,7 +583,10 @@ function handlePointerMove(e) {
     setIsDrawing(false); setMovingSelection(false); setDraggingStamp(false);
     try { canvasRef.current && canvasRef.current.releasePointerCapture(e.pointerId); } catch (_) {}
   }
-  function handlePointerLeave() { if (!isDrawing && !movingSelection && !draggingStamp) setHoverCell(null); }
+  function handlePointerLeave() 
+  { if (isPinchingRef.current) return; // Tambahkan proteksi ini
+    if (!isDrawing && !movingSelection && !draggingStamp) setHoverCell(null); 
+  }
   
   /* --------------------------- gesture pinch to zoom --------------------------- */
   function getDistance(t1, t2) { return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY); }
@@ -592,15 +596,25 @@ function handlePointerMove(e) {
       pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]); 
       pinchStartZoomRef.current = zoom; 
       
-      // BATALKAN GORESAN YANG TIDAK SENGAJA TERBUAT OLEH JARI PERTAMA
+      // Batalkan semua mode aktif
       setIsDrawing(false); 
       setMovingSelection(false); 
       setDraggingStamp(false);
-      if (draftRef.current) {
-        setProject(deepClone(draftRef.current)); // Kembalikan ke kanvas sebelum disentuh
-        draftRef.current = null;
+      
+      // Kembalikan kanvas EXACTLY ke kondisi sebelum jari pertama menyentuh layar
+      if (historyRef.current[historyIndexRef.current]) {
+        setProject(deepClone(historyRef.current[historyIndexRef.current]));
       }
+      
+      // Bersihkan semua referensi sementara agar tidak masuk ke History
+      draftRef.current = null;
+      lastPaintRef.current = null;
+      shapeStartRef.current = null;
+      shapeBaselineRef.current = null;
+      movingBlockRef.current = null;
+      moveBaselineRef.current = null;
     } 
+  }
   }
 
   function handleTouchMove(e) {

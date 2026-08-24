@@ -955,22 +955,22 @@ export default function SahabatKuApp() {
               <button className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: "rgba(209,73,91,0.15)", color: C.danger }} onClick={deleteActive}><Trash2 size={13} /> Hapus</button>
               <button className="p-1 rounded" style={{ color: C.muted }} onClick={() => { setSelection(null); setSelectedStampId(null); }}><X size={14} /></button>
             </div>
-          ) : activeTool === "rect" ? (
-            <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-              <span className="text-[10px] md:text-xs" style={{ color: C.text }}>Kotak</span>
-              <button onClick={() => setRectFilled((f) => !f)} className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: rectFilled ? C.goldSoft : "transparent", color: rectFilled ? C.gold : C.text, border: `1px solid ${C.line}` }}>
-                <Square size={13} /> {rectFilled ? "Terisi" : "Garis Tepi"}
-              </button>
-            </div>
           ) : (activeTool === "pencil" || activeTool === "eraser") ? (
             <div className="absolute top-3 flex items-center gap-2 px-3 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
-              <span className="text-[10px] md:text-xs font-medium" style={{ color: C.text }}>Ukuran</span>
+              <span className="text-[10px] md:text-xs font-medium" style={{ color: C.text }}>Ukuran Kuas</span>
               <input 
                  type="range" min={1} max={10} step={1} value={brushSize} 
                  onChange={(e) => setBrushSize(Number(e.target.value))} 
                  className="w-20 md:w-28 h-1" 
               />
               <span className="text-[10px] md:text-xs w-4 text-center font-bold" style={{ color: C.gold }}>{brushSize}</span>
+            </div>
+          ) : activeTool === "rect" ? (
+            <div className="absolute top-3 flex items-center gap-2 px-2 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
+              <span className="text-[10px] md:text-xs" style={{ color: C.text }}>Kotak</span>
+              <button onClick={() => setRectFilled((f) => !f)} className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: rectFilled ? C.goldSoft : "transparent", color: rectFilled ? C.gold : C.text, border: `1px solid ${C.line}` }}>
+                <Square size={13} /> {rectFilled ? "Terisi" : "Garis Tepi"}
+              </button>
             </div>
           ) : null}
           

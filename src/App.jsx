@@ -216,16 +216,13 @@ export default function SahabatKuApp() {
   });
 
   const [activeTool, setActiveTool] = useState("pencil");
+  const [brushSize, setBrushSize] = useState(1); 
   const [rectFilled, setRectFilled] = useState(false);
   const [activeColor, setActiveColor] = useState(C.gold);
   const [pickerColor, setPickerColor] = useState(C.gold);
   const [customPalette, setCustomPalette] = useState([]);
   const [recentColors, setRecentColors] = useState([]);
   const [activePaletteName, setActivePaletteName] = useState("Sahabat Purple");
-  
-  const [activeTool, setActiveTool] = useState("pencil");
-  const [brushSize, setBrushSize] = useState(1); // <--- Tambahkan baris ini
-  const [rectFilled, setRectFilled] = useState(false);
   const [selection, setSelection] = useState(null);
   const [selectedStampId, setSelectedStampId] = useState(null);
   const [hoverCell, setHoverCell] = useState(null);

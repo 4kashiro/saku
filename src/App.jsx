@@ -6,7 +6,7 @@ import {
   Printer, Palette, X, ArrowUpDown, Grid3x3, Layers as LayersIcon, Upload,
   Slash, Square, Pipette, HelpCircle
 } from "lucide-react";
-import customLogo from "./logo.png";
+const customLogo = "data:image/png;base64,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";
 
 /* ---------------------------------- data ------------------------------------ */
 const APP_THEMES = {
@@ -259,6 +259,16 @@ export default function SahabatKuApp() {
   
   const [sidebarExpanded, setSidebarExpanded] = useState(window.innerWidth > 768);
   const [showAbout, setShowAbout] = useState(false); // Modal About
+  const [showExportScale, setShowExportScale] = useState(false);
+  const [exportScalePos, setExportScalePos] = useState({ top: 0, left: 0 });
+  const exportScaleBtnRef = useRef(null);
+  function toggleExportScale() {
+    if (!showExportScale && exportScaleBtnRef.current) {
+      const r = exportScaleBtnRef.current.getBoundingClientRect();
+      setExportScalePos({ top: r.bottom + 6, left: r.left });
+    }
+    setShowExportScale((s) => !s);
+  }
 
   const [panels, setPanels] = useState({
     theme: { open: true, collapsed: false },
@@ -270,6 +280,9 @@ export default function SahabatKuApp() {
 
   const pinchStartDistRef = useRef(null);
   const pinchStartZoomRef = useRef(null);
+  const pinchStartCenterRef = useRef(null);
+  const pinchStartScrollRef = useRef(null);
+  const canvasScrollRef = useRef(null);
 
   function togglePanelCollapsed(key) { setPanels((p) => ({ ...p, [key]: { ...p[key], collapsed: !p[key].collapsed } })); }
   function toggleSidebar() { setSidebarExpanded(!sidebarExpanded); }
@@ -299,8 +312,6 @@ export default function SahabatKuApp() {
   const historyIndexRef = useRef(0);
   const activePointersRef = useRef(new Map());
   const sessionAbortedRef = useRef(false); // <--- Tambahkan baris ini
-  const pinchStartDistRef = useRef(null);
-  const pinchStartZoomRef = useRef(null);
 
   /* --------------------------- history --------------------------- */
   function pushHistory(nextProject) {
@@ -516,6 +527,10 @@ export default function SahabatKuApp() {
       const pointers = Array.from(activePointersRef.current.values());
       pinchStartDistRef.current = getPointerDistance(pointers[0], pointers[1]);
       pinchStartZoomRef.current = zoom;
+      pinchStartCenterRef.current = { x: (pointers[0].clientX + pointers[1].clientX) / 2, y: (pointers[0].clientY + pointers[1].clientY) / 2 };
+      if (canvasScrollRef.current) {
+        pinchStartScrollRef.current = { left: canvasScrollRef.current.scrollLeft, top: canvasScrollRef.current.scrollTop };
+      }
       
       if (draftRef.current) {
         setProject(deepClone(historyRef.current[historyIndexRef.current]));
@@ -576,6 +591,16 @@ export default function SahabatKuApp() {
       if (pointers.length === 2 && pointers[0] && pointers[1]) {
         const currentDist = getPointerDistance(pointers[0], pointers[1]);
         setZoom(Math.max(0.2, Math.min(5, pinchStartZoomRef.current * (currentDist / pinchStartDistRef.current))));
+
+        // Geser layar (pan) mengikuti titik tengah 2 jari
+        if (pinchStartCenterRef.current && pinchStartScrollRef.current && canvasScrollRef.current) {
+          const cx = (pointers[0].clientX + pointers[1].clientX) / 2;
+          const cy = (pointers[0].clientY + pointers[1].clientY) / 2;
+          const dx = cx - pinchStartCenterRef.current.x;
+          const dy = cy - pinchStartCenterRef.current.y;
+          canvasScrollRef.current.scrollLeft = pinchStartScrollRef.current.left - dx;
+          canvasScrollRef.current.scrollTop = pinchStartScrollRef.current.top - dy;
+        }
       }
       return;
     }
@@ -610,7 +635,7 @@ export default function SahabatKuApp() {
 
   function handlePointerUp(e) {
     activePointersRef.current.delete(e.pointerId);
-    if (activePointersRef.current.size < 2) pinchStartDistRef.current = null;
+    if (activePointersRef.current.size < 2) { pinchStartDistRef.current = null; pinchStartCenterRef.current = null; pinchStartScrollRef.current = null; }
 
     if (sessionAbortedRef.current) {
       if (activePointersRef.current.size === 0) sessionAbortedRef.current = false;
@@ -637,15 +662,11 @@ export default function SahabatKuApp() {
 
   function handlePointerLeave(e) { 
     activePointersRef.current.delete(e.pointerId);
-    if (activePointersRef.current.size < 2) pinchStartDistRef.current = null;
+    if (activePointersRef.current.size < 2) { pinchStartDistRef.current = null; pinchStartCenterRef.current = null; pinchStartScrollRef.current = null; }
     if (!isDrawing && !movingSelection && !draggingStamp) setHoverCell(null); 
   }
   
   /* --------------------------- gesture pinch to zoom --------------------------- */
-  const activePointersRef = useRef(new Map()); // Ubah dari Set menjadi Map
-  const pinchStartDistRef = useRef(null);
-  const pinchStartZoomRef = useRef(null);
-
   function getPointerDistance(p1, p2) { 
     return Math.hypot(p1.clientX - p2.clientX, p1.clientY - p2.clientY); 
   }
@@ -806,18 +827,17 @@ export default function SahabatKuApp() {
           <div className="w-px h-6 shrink-0 mx-1" style={{ background: C.line }} />
           
           <div className="flex items-center gap-1 shrink-0">
-              <select 
-                 title="Skala Export" 
-                 value={exportScale} 
-                 onChange={(e) => setExportScale(Number(e.target.value))} 
-                 className="text-[10px] px-1 py-1 rounded cursor-pointer mr-1" 
-                 style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}
-              >
-                 <option value="1">1x</option>
-                 <option value="4">4x</option>
-                 <option value="8">8x</option>
-                 <option value="16">16x</option>
-              </select>
+              <div className="relative mr-1">
+                 <button
+                    ref={exportScaleBtnRef}
+                    title="Skala Export"
+                    onClick={toggleExportScale}
+                    className="text-[10px] px-2 py-1 rounded cursor-pointer flex items-center gap-1"
+                    style={{ background: C.panelAlt, border: `1px solid ${C.line}`, color: C.text }}
+                 >
+                    {exportScale}x <ChevronDown size={10} />
+                 </button>
+              </div>
               <IconBtn C={C} title="Export PNG" onClick={exportPNG}><ImageIcon size={16} /></IconBtn>
               <IconBtn C={C} title="Export SVG" onClick={exportSVG}><FileText size={16} /></IconBtn>
               <IconBtn C={C} title="Export PDF" onClick={exportPDF}><Printer size={16} /></IconBtn>
@@ -830,6 +850,47 @@ export default function SahabatKuApp() {
           </div>
         </div>
       </div>
+
+      {/* Popover Skala Export - dirender di root agar tidak ke-clip oleh overflow toolbar */}
+      {showExportScale && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShowExportScale(false)} />
+          <div
+             className="fixed z-50 w-48 p-2.5 rounded shadow-2xl"
+             style={{ top: exportScalePos.top, left: exportScalePos.left, background: C.panelAlt, border: `1px solid ${C.line}` }}
+          >
+             <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px]" style={{ color: C.muted }}>Skala Export (PNG/PDF)</span>
+                <input
+                   type="number" min={1} max={100} value={exportScale}
+                   onChange={(e) => setExportScale(Math.max(1, Math.min(100, Number(e.target.value) || 1)))}
+                   className="w-11 text-[11px] px-1 py-0.5 rounded text-center"
+                   style={{ background: C.chrome, border: `1px solid ${C.line}`, color: C.text }}
+                />
+             </div>
+             <input
+                type="range" min={1} max={100} step={1} value={exportScale}
+                onChange={(e) => setExportScale(Number(e.target.value))}
+                className="w-full"
+             />
+             <div className="flex flex-wrap gap-1 mt-1.5">
+                {[1, 4, 8, 16, 32, 64, 100].map((v) => (
+                   <button
+                      key={v} onClick={() => setExportScale(v)}
+                      className="text-[9px] px-1.5 py-0.5 rounded"
+                      style={{ background: exportScale === v ? C.goldSoft : "transparent", color: exportScale === v ? C.gold : C.text, border: `1px solid ${C.line}` }}
+                   >{v}x</button>
+                ))}
+             </div>
+             <p className="text-[9px] mt-2" style={{ color: C.muted }}>
+                Hasil: {gridCols * exportScale}×{gridRows * exportScale}px
+                {gridCols * exportScale > 8000 && (
+                   <span style={{ color: C.danger }}> — sangat besar, export bisa lambat/berat</span>
+                )}
+             </p>
+          </div>
+        </>
+      )}
 
       {/* ---------- main area ---------- */}
       <div className="flex flex-1 min-h-0 relative overflow-hidden">
@@ -865,7 +926,7 @@ export default function SahabatKuApp() {
             </div>
           ) : null}
           
-          <div className="max-w-full max-h-full overflow-auto p-4 md:p-6">
+          <div ref={canvasScrollRef} className="max-w-full max-h-full overflow-auto p-4 md:p-6" style={{ touchAction: "none" }}>
             <canvas
               ref={canvasRef} draggable={false} onDragStart={(e) => e.preventDefault()}
               onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}

@@ -222,7 +222,10 @@ export default function SahabatKuApp() {
   const [customPalette, setCustomPalette] = useState([]);
   const [recentColors, setRecentColors] = useState([]);
   const [activePaletteName, setActivePaletteName] = useState("Sahabat Purple");
-
+  
+  const [activeTool, setActiveTool] = useState("pencil");
+  const [brushSize, setBrushSize] = useState(1); // <--- Tambahkan baris ini
+  const [rectFilled, setRectFilled] = useState(false);
   const [selection, setSelection] = useState(null);
   const [selectedStampId, setSelectedStampId] = useState(null);
   const [hoverCell, setHoverCell] = useState(null);
@@ -418,13 +421,51 @@ export default function SahabatKuApp() {
   }
   function paintLineLive(from, to, color) {
     const next = draftRef.current, layer = next.layers.find((l) => l.id === next.activeLayerId);
-    bresenhamLine(from.gx, from.gy, to.gx, to.gy).forEach(([x, y]) => { if (color === null) delete layer.cells[`${x},${y}`]; else layer.cells[`${x},${y}`] = color; });
+    bresenhamLine(from.gx, from.gy, to.gx, to.gy).forEach(([cx, cy]) => {
+      // Loop untuk membuat kuas lebih tebal
+      const offset = Math.floor(brushSize / 2);
+      for (let i = 0; i < brushSize; i++) {
+        for (let j = 0; j < brushSize; j++) {
+          const px = cx - offset + i;
+          const py = cy - offset + j;
+          // Pastikan tidak keluar dari batas kanvas
+          if (px >= 0 && px < gridCols && py >= 0 && py < gridRows) {
+            if (color === null) delete layer.cells[`${px},${py}`];
+            else layer.cells[`${px},${py}`] = color;
+          }
+        }
+      }
+    });
     setProject({ ...next });
   }
+  
   function eraseLineLive(from, to) {
-    const next = draftRef.current, layer = next.layers.find((l) => l.id === next.activeLayerId), pts = bresenhamLine(from.gx, from.gy, to.gx, to.gy);
-    pts.forEach(([x, y]) => delete layer.cells[`${x},${y}`]);
-    layer.stamps = layer.stamps.filter((st) => !pts.some(([x, y]) => x >= st.gx && x <= st.gx + getEffectiveFootprint(st).w - 1 && y >= st.gy && y <= st.gy + getEffectiveFootprint(st).h - 1));
+    const next = draftRef.current, layer = next.layers.find((l) => l.id === next.activeLayerId);
+    const pts = bresenhamLine(from.gx, from.gy, to.gx, to.gy);
+    
+    pts.forEach(([cx, cy]) => {
+      const offset = Math.floor(brushSize / 2);
+      for (let i = 0; i < brushSize; i++) {
+        for (let j = 0; j < brushSize; j++) {
+          const px = cx - offset + i;
+          const py = cy - offset + j;
+          delete layer.cells[`${px},${py}`];
+        }
+      }
+    });
+    
+    layer.stamps = layer.stamps.filter((st) => !pts.some(([cx, cy]) => {
+        // Logika penghapusan stempel yang bersinggungan dengan kuas
+        const offset = Math.floor(brushSize / 2);
+        for(let i=0; i<brushSize; i++) {
+            for(let j=0; j<brushSize; j++) {
+                const px = cx - offset + i;
+                const py = cy - offset + j;
+                if (px >= st.gx && px <= st.gx + getEffectiveFootprint(st).w - 1 && py >= st.gy && py <= st.gy + getEffectiveFootprint(st).h - 1) return true;
+            }
+        }
+        return false;
+    }));
     setProject({ ...next });
   }
   function bucketFill(gx, gy, fillColor) {
@@ -923,6 +964,16 @@ export default function SahabatKuApp() {
               <button onClick={() => setRectFilled((f) => !f)} className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 rounded" style={{ background: rectFilled ? C.goldSoft : "transparent", color: rectFilled ? C.gold : C.text, border: `1px solid ${C.line}` }}>
                 <Square size={13} /> {rectFilled ? "Terisi" : "Garis Tepi"}
               </button>
+            </div>
+          ) : (activeTool === "pencil" || activeTool === "eraser") ? (
+            <div className="absolute top-3 flex items-center gap-2 px-3 py-1.5 rounded shadow-lg z-10" style={{ background: C.panelAlt, border: `1px solid ${C.line}` }}>
+              <span className="text-[10px] md:text-xs font-medium" style={{ color: C.text }}>Ukuran</span>
+              <input 
+                 type="range" min={1} max={10} step={1} value={brushSize} 
+                 onChange={(e) => setBrushSize(Number(e.target.value))} 
+                 className="w-20 md:w-28 h-1" 
+              />
+              <span className="text-[10px] md:text-xs w-4 text-center font-bold" style={{ color: C.gold }}>{brushSize}</span>
             </div>
           ) : null}
           
